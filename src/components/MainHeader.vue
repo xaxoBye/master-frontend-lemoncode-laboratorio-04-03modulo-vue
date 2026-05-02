@@ -1,6 +1,6 @@
 <template>
   <header>
-    <h1>Planificador menús <span class="titulo-largo">semanal</span></h1>
+    <h1>Planificador menús <span class="titulo-largo">&nbsp; semanal</span></h1>
     <nav class="grupo-botones">
       <button @click="crearNavegar">Planificador</button>
       <button @click="handleNav('favoritos')">Favoritos</button>
@@ -64,11 +64,14 @@ header h1 {
 
 /* --- Responsive para Móvil --- */
 /* Suponemos móvil a partir de 768px de ancho (pantallas pequeñas) */
-@media (max-width: 768px) {
+@media (max-width: 830px) {
   header {
     flex-direction: column;
     align-items: flex-start; /* Alinea todo a la izquierda */
+    justify-content: flex-start;
     gap: 15px;
+    box-sizing: border-box;
+    height: auto;
   }
 
   .grupo-botones {

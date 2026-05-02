@@ -3,21 +3,15 @@
     <h2 class="dia-titulo">{{ dia }}</h2>
 
     <dl class="comidas">
-      <div class="bloque-comida">
-        <dt>Comida:</dt>
-        <dd class="contenido-comida">{{ platoComida || 'Sin asignar' }}</dd>
-      </div>
-
-      <div class="bloque-comida">
-        <dt>Cena:</dt>
-        <dd class="contenido-comida">{{ platoCena || 'Sin asignar' }}</dd>
-      </div>
+      <MomentoDia momento="Comida" :plato="platoComida" />
+      <MomentoDia momento="Cena" :plato="platoCena" />
     </dl>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import MomentoDia from './MomentoDia.vue';
 import menuSemanal from '@/data/comidas.json';
 import type { DiasSemana, MomentoComida } from '@/types';
 
@@ -59,6 +53,9 @@ const platoCena = computed(() => obtenerPlato(props.dia, 'cena'));
   padding: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   cursor: grab;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
 }
 
 .dia-titulo {
@@ -74,16 +71,6 @@ const platoCena = computed(() => obtenerPlato(props.dia, 'cena'));
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.bloque-comida {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.contenido-comida {
-  color: #555;
-  font-weight: 500;
 }
 
 .dia-caja:active {

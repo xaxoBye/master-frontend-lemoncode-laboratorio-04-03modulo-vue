@@ -71,6 +71,7 @@ useDraggable(target, diasOrdenados, {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
 }
 
 .dias-semana.invalid-drop,
@@ -103,7 +104,11 @@ p {
 @media (min-width: 768px) {
   .dias-semana {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .dias-semana > lis {
+    width: 100%;
   }
 }
 </style>
