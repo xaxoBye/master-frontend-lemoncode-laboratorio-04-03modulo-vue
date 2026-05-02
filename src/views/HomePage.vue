@@ -2,29 +2,21 @@
   <main class="planificador">
     <ol ref="target" class="dias-semana">
       <li v-for="dia in diasOrdenados" :key="dia" class="dia-caja">
-        <h2 class="dia-titulo">{{ dia }}</h2>
-
-        <dl class="comidas">
-          <div class="bloque-comida">
-            <dt>Comida:</dt>
-            <dd class="contenido-comida">{{ obtenerPlato(dia, 'comida') || 'Cargando...' }}</dd>
-          </div>
-
-          <div class="bloque-comida">
-            <dt>Cena:</dt>
-            <dd class="contenido-comida">{{ obtenerPlato(dia, 'cena') || 'Cargando...' }}</dd>
-          </div>
-        </dl>
+        <CardDia :dia="dia" />
       </li>
     </ol>
+    <p>
+      Si quieres comenzar la semana por otro día. Selecciona el día y arrastralo en el primer lugar
+      de la lista. O ir a
+      <RouterLink to="/configuracion" class="enlace-config"> Configuración → </RouterLink>
+    </p>
   </main>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import menuSemanal from '@/data/comidas.json';
+import CardDia from '@/components/CardDia.vue';
 import { DiasSemana } from '@/types';
-import type { MomentoComida } from '@/types';
 import { useDraggable } from 'vue-draggable-plus';
 import { useListsStore } from '@/stores/lists';
 
@@ -63,81 +55,22 @@ useDraggable(target, diasOrdenados, {
     }
   },
 });
-
-const obtenerPlato = (diaActual: DiasSemana, momentoActual: MomentoComida): string => {
-  const platoEncontrado = menuSemanal.find((plato) =>
-    plato.asignaciones.some(
-      (asignacion) => asignacion.dia === diaActual && asignacion.momento === momentoActual,
-    ),
-  );
-
-  if (platoEncontrado) {
-    const asignacionEspecifica = platoEncontrado.asignaciones.find(
-      (asignacion) => asignacion.dia === diaActual && asignacion.momento === momentoActual,
-    );
-
-    if (asignacionEspecifica?.favorito) {
-      return `${platoEncontrado.nombre} ⭐`;
-    }
-
-    return platoEncontrado.nombre;
-  }
-
-  return 'Sin asignar';
-};
 </script>
 
 <style scoped>
+/* Estilos del contenedor principal */
 .planificador {
   padding: 1rem;
   color: #333;
 }
 
 .dias-semana {
-  list-style: none; /* Quita los números 1. 2. 3. por defecto */
+  list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
-  flex-direction: column; /* Para escritorio quizás quieras grid, pero esto es móvil-first */
-  gap: 1rem;
-}
-
-.dia-caja {
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  cursor: grab;
-}
-
-.dia-titulo {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.2rem;
-  color: #333;
-  text-transform: capitalize; /* Pone la primera letra en mayúscula */
-  border-bottom: 2px solid #0066ff;
-  padding-bottom: 0.5rem;
-}
-
-.comidas {
-  display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-.bloque-comida {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.bloque-comida strong {
-  color: #555;
-  min-width: 60px;
-}
-
-.contenido-comida {
-  color: #999;
+  gap: 1rem;
 }
 
 .dias-semana.invalid-drop,
@@ -145,11 +78,28 @@ const obtenerPlato = (diaActual: DiasSemana, momentoActual: MomentoComida): stri
   cursor: not-allowed !important;
 }
 
-.dia-caja:active {
-  cursor: grabbing;
+p {
+  color: white;
+}
+.enlace-config {
+  color: #0066ff;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s;
 }
 
-/* --- Responsive para Escritorio --- */
+.enlace-config:hover {
+  color: #004499;
+  text-decoration: none;
+}
+
+/* Cuando el enlace está activo (estás en /configuracion) */
+.enlace-config.router-link-active {
+  color: #004499;
+  font-weight: bold;
+}
+
+/* Responsive para Escritorio */
 @media (min-width: 768px) {
   .dias-semana {
     display: grid;
