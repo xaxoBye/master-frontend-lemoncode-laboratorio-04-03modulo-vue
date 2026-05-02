@@ -1,6 +1,62 @@
+:root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   padding: 0;
   margin: 0;
   background-color: #1a2229;
   color: white;
+  min-height: 100vh;
+
+  /* --- ESTILOS DE TEXTO AÑADIDOS --- */
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue',
+    sans-serif;
+  font-size: 16px;
+  /* Tamaño base legible */
+  line-height: 1.6;
+  /* Separación entre líneas para mejor lectura */
+  font-weight: 400;
+  /* Grosor normal */
+}
+
+#app {
+  min-height: 100vh;
+}
+
+button {
+  padding: 10px;
+  background-color: #1d1a29;
+  border-radius: 15px;
+  color: orangered;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0066ff;
+  color: #1d1a29;
+}
+
+@media (prefers-reduced-motion) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }

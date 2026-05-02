@@ -1,0 +1,70 @@
+[
+  {
+    "id": "1",
+    "nombre": "Pollo al horno",
+    "asignaciones": [
+      { "dia": "LUNES", "momento": "comida", "favorito": true },
+      { "dia": "MIÉRCOLES", "momento": "cena", "favorito": false }
+    ]
+  },
+  {
+    "id": "2",
+    "nombre": "Sopa de pescado",
+    "asignaciones": [
+      { "dia": "LUNES", "momento": "cena", "favorito": false },
+      { "dia": "MARTES", "momento": "comida", "favorito": true }
+    ]
+  },
+  {
+    "id": "3",
+    "nombre": "Canalones de carne",
+    "asignaciones": [
+      { "dia": "MARTES", "momento": "cena", "favorito": true }
+    ]
+  },
+  {
+    "id": "4",
+    "nombre": "Ensalada César",
+    "asignaciones": [
+      { "dia": "MIÉRCOLES", "momento": "comida", "favorito": false }
+    ]
+  },
+  {
+    "id": "5",
+    "nombre": "Lentejas estofadas",
+    "asignaciones": [
+      { "dia": "JUEVES", "momento": "comida", "favorito": false }
+    ]
+  },
+  {
+    "id": "6",
+    "nombre": "Salmón a la plancha",
+    "asignaciones": [
+      { "dia": "JUEVES", "momento": "cena", "favorito": true },
+      { "dia": "DOMINGO", "momento": "comida", "favorito": false }
+    ]
+  },
+  {
+    "id": "7",
+    "nombre": "Paella",
+    "asignaciones": [
+      { "dia": "VIERNES", "momento": "comida", "favorito": true },
+      { "dia": "SÁBADO", "momento": "comida", "favorito": true }
+    ]
+  },
+  {
+    "id": "8",
+    "nombre": "Tortilla española",
+    "asignaciones": [
+      { "dia": "VIERNES", "momento": "cena", "favorito": false },
+      { "dia": "SÁBADO", "momento": "cena", "favorito": true }
+    ]
+  },
+  {
+    "id": "9",
+    "nombre": "Pizza casera",
+    "asignaciones": [
+      { "dia": "DOMINGO", "momento": "cena", "favorito": false }
+    ]
+  }
+]
