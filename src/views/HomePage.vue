@@ -109,6 +109,6 @@ p {
 
   .dias-semana > lis {
     width: 100%;
-  }
+gi  }
 }
 </style>
