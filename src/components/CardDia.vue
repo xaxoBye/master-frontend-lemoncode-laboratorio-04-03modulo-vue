@@ -3,8 +3,8 @@
     <h2 class="dia-titulo">{{ dia }}</h2>
 
     <dl class="comidas">
-      <MomentoDia momento="Comida" :plato="platoComida" />
-      <MomentoDia momento="Cena" :plato="platoCena" />
+      <MomentoDia momento="Comida" :platos="platosComida" />
+      <MomentoDia momento="Cena" :platos="platosCena" />
     </dl>
   </div>
 </template>
@@ -19,14 +19,14 @@ const props = defineProps<{
   dia: DiasSemana;
 }>();
 
-const obtenerPlato = (diaActual: DiasSemana, momentoActual: MomentoComida): string => {
-  const platoEncontrado = menuSemanal.find((plato) =>
+const obtenerPlatos = (diaActual: DiasSemana, momentoActual: MomentoComida): string[] => {
+  const platosEncontrados = menuSemanal.filter((plato) =>
     plato.asignaciones.some(
       (asignacion) => asignacion.dia === diaActual && asignacion.momento === momentoActual,
     ),
   );
 
-  if (platoEncontrado) {
+  return platosEncontrados.map((platoEncontrado) => {
     const asignacionEspecifica = platoEncontrado.asignaciones.find(
       (asignacion) => asignacion.dia === diaActual && asignacion.momento === momentoActual,
     );
@@ -36,13 +36,11 @@ const obtenerPlato = (diaActual: DiasSemana, momentoActual: MomentoComida): stri
     }
 
     return platoEncontrado.nombre;
-  }
-
-  return 'Sin asignar';
+  });
 };
 
-const platoComida = computed(() => obtenerPlato(props.dia, 'comida'));
-const platoCena = computed(() => obtenerPlato(props.dia, 'cena'));
+const platosComida = computed(() => obtenerPlatos(props.dia, 'comida'));
+const platosCena = computed(() => obtenerPlatos(props.dia, 'cena'));
 </script>
 
 <style scoped>

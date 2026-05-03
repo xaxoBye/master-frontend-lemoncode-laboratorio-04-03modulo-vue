@@ -17,7 +17,7 @@
   },
   {
     "id": "3",
-    "nombre": "Canalones de carne",
+    "nombre": "Canalones carne",
     "asignaciones": [
       { "dia": "MARTES", "momento": "cena", "favorito": true }
     ]
@@ -38,9 +38,9 @@
   },
   {
     "id": "6",
-    "nombre": "Salmón a la plancha",
+    "nombre": "Salmón plancha",
     "asignaciones": [
-      { "dia": "JUEVES", "momento": "cena", "favorito": true },
+      { "dia": "JUEVES", "momento": "cena", "favorito": false },
       { "dia": "DOMINGO", "momento": "comida", "favorito": false }
     ]
   },
@@ -65,6 +65,38 @@
     "nombre": "Pizza casera",
     "asignaciones": [
       { "dia": "DOMINGO", "momento": "cena", "favorito": false }
+    ]
+  },
+  {
+    "id": "10",
+    "nombre": "Patatas bravas",
+    "asignaciones": [
+      { "dia": "LUNES", "momento": "comida", "favorito": false },
+      { "dia": "JUEVES", "momento": "comida", "favorito": false }
+    ]
+  },
+  {
+    "id": "11",
+    "nombre": "Albóndigas salsa",
+    "asignaciones": [
+      { "dia": "LUNES", "momento": "comida", "favorito": false },
+      { "dia": "JUEVES", "momento": "comida", "favorito": true }
+    ]
+  },
+  {
+    "id": "12",
+    "nombre": "Arroz con leche",
+    "asignaciones": [
+      { "dia": "MARTES", "momento": "comida", "favorito": false },
+      { "dia": "VIERNES", "momento": "comida", "favorito": true }
+    ]
+  },
+  {
+    "id": "12",
+    "nombre": "Pulpo gallego",
+    "asignaciones": [
+      { "dia": "MARTES", "momento": "cena", "favorito": false },
+      { "dia": "VIERNES", "momento": "cena", "favorito": false }
     ]
   }
 ]
