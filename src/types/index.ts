@@ -13,6 +13,7 @@ export type MomentoComida = 'comida' | 'cena';
 export interface Asignacion {
   dia: DiasSemana;
   momento: MomentoComida;
+  favorito: boolean;
 }
 
 export interface ComidaAsignada {
