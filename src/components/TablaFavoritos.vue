@@ -134,9 +134,10 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
 .tabla-favoritos {
   border-collapse: collapse;
   width: fit-content;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  min-width: 100%;
+  table-layout: auto;
+  font-family: 'Segoe UI, Arial, sans-serif';
   background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================
@@ -186,18 +187,20 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
 
 /* Ocultar pseudo-elementos en desktop */
 .celda-dia::before,
-.celda-momento::before {
+.celda-momento::before,
+.celda-momento-comida::before {
   display: none;
 }
 
 /* ----- PRIMERA COLUMNA (PLATO) ----- */
 .celda-plato {
   text-align: left !important;
-  padding-left: 12px !important;
-  padding-right: 12px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
   white-space: nowrap;
-  width: auto;
-  min-width: 0;
+  width: 180px;
+  min-width: 150px;
+  max-width: 250px;
   background-color: #2c3e50;
 }
 
@@ -212,12 +215,13 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
 
 .nombre-plato {
   font-weight: 600;
-  color: #2c3e50;
-  padding: 10px 12px;
+  background-color: #2c3e50;
+  padding: 10px 16px !important;
   border-bottom: 1px solid #ecf0f1;
   border-right: 2px solid #ecf0f1;
   white-space: nowrap;
-  width: auto;
+  width: 180px !important;
+  min-width: 150px !important;
 }
 
 .icon-fav {
@@ -275,6 +279,11 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
      🔷 CELDA-DÍA (cabecera: L, M, Mx...)
      Ancho: 56px (2 columnas de emoji × 28px)
      ============================================ */
+  .tabla-favoritos {
+    table-layout: fixed !important;
+    min-width: max(100%, 500px);
+  }
+
   .celda-dia {
     font-size: 0 !important;
     color: transparent !important;
@@ -307,7 +316,8 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
      🔷 CELDA-MOMENTO (cabecera: ☀, 🌙)
      Ancho: 28px (1 emoji exacto)
      ============================================ */
-  .celda-momento {
+  .celda-momento,
+  .celda-momento-comida {
     font-size: 0 !important;
     color: transparent !important;
 
@@ -322,7 +332,8 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
     line-height: normal !important;
   }
 
-  .celda-momento::before {
+  .celda-momento::before,
+  .celda-momento-comida::before {
     content: attr(data-short) !important;
     display: block !important;
 
@@ -378,6 +389,9 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
 
   /* Nombre del plato más compacto */
   .nombre-plato {
+    position: sticky;
+    left: 0;
+    z-index: 10;
     padding: 8px 6px !important;
     font-size: 13px !important;
   }
@@ -385,6 +399,13 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
   /* Reducir espaciado entre filas */
   .fila-plato {
     height: auto !important;
+  }
+
+  .celda-plato {
+    position: sticky;
+    left: 0;
+    z-index: 11;
+    background-color: #2c3e50;
   }
 }
 </style>
