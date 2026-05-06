@@ -1,24 +1,85 @@
 <template>
   <header>
-    <h1>Planificador menús <span class="titulo-largo">&nbsp; semanal</span></h1>
+    <h1>{{ tituloPagina }}</h1>
     <nav class="grupo-botones">
-      <button @click="crearNavegar">Planificador</button>
-      <button @click="handleNav('favoritos')">Favoritos</button>
-      <button @click="handleNav('configuracion')">Configuración</button>
-      <button @click="handleNav('about')">Acerca de</button>
+      <button v-if="rutaActual !== '/'" @click="crearNavegar" class="btn-nav">Planificador</button>
+      <button v-if="rutaActual !== '/favoritos'" @click="handleNav('favoritos')" class="btn-nav">
+        Favoritos
+      </button>
+      <button
+        v-if="rutaActual !== '/configuracion'"
+        @click="handleNav('configuracion')"
+        class="btn-nav"
+      >
+        Configuración
+      </button>
+      <button v-if="rutaActual !== '/about'" @click="handleNav('about')" class="btn-nav">
+        Acerca de
+      </button>
     </nav>
   </header>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import router from '@/router';
+import { useRoute, useRouter } from 'vue-router';
 import { useListsStore } from '@/stores/lists';
-import { DiasSemana } from '@/types';
+import { DiasSemana, MomentoComida } from '@/types';
+import type { ConfiguracionTitulo } from '@/types';
+
+const route = useRoute();
+const useRouterRef = useRouter();
+
+const rutaActual = computed(() => route.path);
+
+const titulosPorRuta: Record<string, ConfiguracionTitulo> = {
+  '/': {
+    titulo: 'Planificador menús',
+    mostrarSubtitulo: true,
+    nombreBoton: 'Planificador',
+  },
+  '/favoritos': {
+    titulo: 'Favoritos',
+    mostrarSubtitulo: false,
+    nombreBoton: 'Favoritos',
+  },
+  '/configuracion': {
+    titulo: 'Configuración',
+    mostrarSubtitulo: false,
+    nombreBoton: 'Configuración',
+  },
+  '/about': {
+    titulo: 'Acerca de...',
+    mostrarSubtitulo: false,
+    nombreBoton: 'Acerca de',
+  },
+};
+
+// ✅ Título dinámico según ruta
+const tituloPagina = computed(() => {
+  const config = titulosPorRuta[rutaActual.value];
+
+  // Si no hay configuración para esta ruta, usar genérico
+  return config?.titulo || 'Planificador menús';
+});
+
+// ✅ Mostrar/ocultar "semanal" sub-título
+const mostrarSubtitulo = computed(() => {
+  const config = titulosPorRuta[rutaActual.value];
+  return config?.mostrarSubtitulo || false;
+});
+
+// ✅ Nombre de la página actual (para indicador opcional)
+const nombrePaginaActual = computed(() => {
+  const config = titulosPorRuta[rutaActual.value];
+  return config?.nombreBoton || '';
+});
 
 const listsStore = useListsStore();
 
 const handleNewList = async () => {
-  const newList = await listsStore.createList('platano', DiasSemana.LUNES, 'comida');
+  const newList = await listsStore.createList('platano', DiasSemana.LUNES, MomentoComida.comida);
   console.log(newList);
 };
 
@@ -62,6 +123,40 @@ header h1 {
   padding: 0;
 }
 
+.btn-nav {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  background-color: rgba(255, 255, 255, 0.15); /* Semi-transparente */
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  user-select: none;
+  outline: none;
+}
+
+.btn-nav:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-nav:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-nav:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
 /* --- Responsive para Móvil --- */
 /* Suponemos móvil a partir de 768px de ancho (pantallas pequeñas) */
 @media (max-width: 830px) {
@@ -81,10 +176,6 @@ header h1 {
 
   .grupo-botones button {
     width: 100%;
-  }
-
-  .titulo-largo {
-    display: none;
   }
 }
 </style>

@@ -8,7 +8,10 @@ export enum DiasSemana {
   DOMINGO = 'DOMINGO',
 }
 
-export type MomentoComida = 'comida' | 'cena';
+export enum MomentoComida {
+  comida = 'comida',
+  cena = 'cena',
+}
 
 export interface Asignacion {
   dia: DiasSemana;
@@ -20,4 +23,10 @@ export interface ComidaAsignada {
   id: string;
   nombre: string;
   asignaciones: Asignacion[];
+}
+
+export interface ConfiguracionTitulo {
+  titulo: string;
+  mostrarSubtitulo: boolean;
+  nombreBoton: string;
 }

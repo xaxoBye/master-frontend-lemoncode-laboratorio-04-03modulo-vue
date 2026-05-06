@@ -1,5 +1,9 @@
 <template>
   <fieldset class="menu-fieldset">
+    <div class="tabla-menu">
+      <TablaGuardar />
+    </div>
+
     <legend class="menu-legend">🍽️ Semana Actual</legend>
     <table class="tabla-favoritos">
       <thead>
@@ -26,7 +30,7 @@
 
       <tbody>
         <!-- Filas de platos -->
-        <tr v-for="plato in platos" :key="plato.id" class="fila-plato">
+        <tr v-for="plato in store.platosOrdenados" :key="plato.id" class="fila-plato">
           <td class="nombre-plato">
             {{ plato.nombre }}
             <span v-if="tieneFavoritos(plato)" class="icon-fav">⭐</span>
@@ -35,27 +39,31 @@
           <template v-for="dia in diasSemana" :key="`${plato.id}-${dia}`">
             <td
               class="celda-momento-comida"
-              :class="getCeldaClass(plato, dia, 'comida')"
-              @click="toggleFavorito(plato, dia, 'comida')"
+              :class="getCeldaClass(plato, dia, MomentoComida.comida)"
+              @click="handleToggleFavoritos(plato, dia, MomentoComida.comida)"
+              @contextmenu.prevent="handleToggleAsignacion(plato, dia, MomentoComida.comida)"
+              :title="getTooltip(plato, dia, MomentoComida.comida)"
             >
-              <span v-if="tieneAsignacion(plato, dia, 'comida')" class="marca">
-                {{ esFavorito(plato, dia, 'comida') ? '⭐' : '●' }}
+              <span v-if="tieneAsignacion(plato, dia, MomentoComida.comida)" class="marca">
+                {{ esFavorito(plato, dia, MomentoComida.comida) ? '⭐' : '●' }}
               </span>
             </td>
 
             <td
-              :class="getCeldaClass(plato, dia, 'cena')"
-              @click="toggleFavorito(plato, dia, 'cena')"
+              :class="getCeldaClass(plato, dia, MomentoComida.cena)"
+              @click="handleToggleFavoritos(plato, dia, MomentoComida.cena)"
+              @contextmenu.prevent="handleToggleAsignacion(plato, dia, MomentoComida.cena)"
+              :title="getTooltip(plato, dia, MomentoComida.cena)"
             >
-              <span v-if="tieneAsignacion(plato, dia, 'cena')" class="marca">
-                {{ esFavorito(plato, dia, 'cena') ? '⭐' : '●' }}
+              <span v-if="tieneAsignacion(plato, dia, MomentoComida.cena)" class="marca">
+                {{ esFavorito(plato, dia, MomentoComida.cena) ? '⭐' : '●' }}
               </span>
             </td>
           </template>
         </tr>
 
         <!-- Estado vacío -->
-        <tr v-if="platos.length === 0">
+        <tr v-if="store.platos.length === 0">
           <td colspan="15" class="sin-datos">⚪ No hay platos disponibles</td>
         </tr>
       </tbody>
@@ -64,15 +72,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import menuSemanal from '@/data/comidas.json';
 import { DiasSemana } from '@/types';
-import type { ComidaAsignada, MomentoComida } from '@/types';
+import type { ComidaAsignada } from '@/types';
+import { MomentoComida } from '@/types';
+import TablaGuardar from './TablaGuardar.vue';
+import { useMenuStore } from '@/stores/menuStore';
 
-// ====== DATOS ======
-const platos = ref<ComidaAsignada[]>(menuSemanal as ComidaAsignada[]);
+const store = useMenuStore();
 
-// ====== DÍAS DE LA SEMANA ======
 const diasSemana: DiasSemana[] = [
   DiasSemana.LUNES,
   DiasSemana.MARTES,
@@ -83,10 +90,25 @@ const diasSemana: DiasSemana[] = [
   DiasSemana.DOMINGO,
 ];
 
-// ====== FUNCIONES AUXILIARES ======
+function handleToggleFavoritos(
+  plato: ComidaAsignada,
+  dia: DiasSemana,
+  momento: MomentoComida,
+): void {
+  store.toggleFavorito(plato, dia, momento);
+}
 
+function handleToggleAsignacion(
+  plato: ComidaAsignada,
+  dia: DiasSemana,
+  momento: MomentoComida,
+): void {
+  store.toggleAsignacion(plato, dia, momento);
+}
+
+/** Buscar asignación (delega al store) */
 function buscarAsignacion(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida) {
-  return plato.asignaciones.find((a) => a.dia === dia && a.momento === momento);
+  return store.buscarAsignacion(plato, dia, momento);
 }
 
 function tieneAsignacion(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida): boolean {
@@ -116,12 +138,16 @@ function getCeldaClass(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoC
   return classes;
 }
 
-function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida): void {
-  const asignacion = buscarAsignacion(plato, dia, momento);
+function getTooltip(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida): string {
+  const tiene = tieneAsignacion(plato, dia, momento);
+  const fav = esFavorito(plato, dia, momento);
 
-  if (asignacion) {
-    asignacion.favorito = !asignacion.favorito;
-    console.log(`🔄 ${plato.nombre} | ${dia} ${momento} → ${asignacion.favorito}`);
+  if (!tiene) {
+    return `🖱️ Click der.: Añadir "${plato.nombre}" a ${dia} (${momento})`;
+  } else if (fav) {
+    return `⭐ Favorito | Click izq.: Quitar favorito | Click der.: Borrar asignación`;
+  } else {
+    return `● Asignado | Click izq.: Marcar favorito | Click der.: Borrar asignación`;
   }
 }
 </script>
@@ -130,6 +156,11 @@ function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: Momento
 /* ============================================
    ESTILOS - TABLA ADAPTATIVA
    ============================================ */
+.tabla-menu {
+  background-color: #0066ff;
+  padding:15px;
+  border: 1px solid white;
+}
 
 .tabla-favoritos {
   border-collapse: collapse;

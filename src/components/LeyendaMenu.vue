@@ -5,10 +5,16 @@
     <div class="leyenda-contenido">
       <div class="leyenda-fila"><strong>⭐</strong> Plato marcado como favorito</div>
       <div class="leyenda-fila"><strong>●</strong> Plato asignado al menú</div>
-      <div class="leyenda-fila"><strong>☀</strong> Momento: Comida (mediodía). Tamaño móvil</div>
-      <div class="leyenda-fila"><strong>🌙</strong> Momento: Cena (noche). Tamaño móvil</div>
+      <div class="leyenda-fila"><strong>☀</strong> Tamaño móvil: Comida (mediodía).</div>
+      <div class="leyenda-fila"><strong>🌙</strong> Tamaño móvil: Cena (noche).</div>
       <div class="leyenda-fila leyenda-tip">
-        💡 <em>Click en cualquier celda para alternar favorito</em>
+        <ul>
+          <span>💡 Click</span>
+          <li><em>Izquierdo en cualquier celda para alternar favorito.</em></li>
+          <li>
+            <em>Derecho en cualquier celda para añadir/eliminar plato.</em>
+          </li>
+        </ul>
       </div>
     </div>
   </details>

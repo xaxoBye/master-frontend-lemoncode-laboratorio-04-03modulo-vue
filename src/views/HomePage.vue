@@ -14,14 +14,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import CardDia from '@/components/CardDia.vue';
 import { DiasSemana } from '@/types';
 import { useDraggable } from 'vue-draggable-plus';
 import { useListsStore } from '@/stores/lists';
+import menuSemanal from '@/data/comidas.json';
+import { useMenuStore } from '@/stores/menuStore';
+import type { ComidaAsignada } from '@/types';
 
 const target = ref<HTMLElement | null>(null);
 const listsStore = useListsStore();
+
+const menuStore = useMenuStore();
+
+onMounted(() => {
+  inicializarDatosMenu();
+});
 
 const diasOrdenados = ref<DiasSemana[]>([...listsStore.diasOrdenados]);
 
@@ -55,6 +64,32 @@ useDraggable(target, diasOrdenados, {
     }
   },
 });
+
+function inicializarDatosMenu(): void {
+  console.log('🚀 Inicializando datos del menú...');
+
+  // 1. Intentar recuperar de localStorage (datos guardados previamente)
+  const datosGuardados = localStorage.getItem('menu-semanal-favoritos');
+
+  if (datosGuardados) {
+    try {
+      const datosParseados: ComidaAsignada[] = JSON.parse(datosGuardados);
+
+      // Validar que sea un array válido
+      if (Array.isArray(datosParseados) && datosParseados.length > 0) {
+        menuStore.cargarPlatos(datosParseados);
+        console.log('✅ Datos recuperados de localStorage:', datosParseados.length, 'platos');
+        return; // ← Salir temprano, todo listo
+      }
+    } catch (error) {
+      console.error('❌ Error leyendo localStorage, usando datos por defecto:', error);
+    }
+  }
+
+  // 2. Si no hay localStorage (o está corrupto) → usar JSON por defecto
+  console.log('📥 Primera carga: usando datos por defecto del JSON');
+  menuStore.cargarPlatos(menuSemanal as ComidaAsignada[]);
+}
 </script>
 
 <style scoped>

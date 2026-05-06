@@ -12,35 +12,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import MomentoDia from './MomentoDia.vue';
-import menuSemanal from '@/data/comidas.json';
-import type { DiasSemana, MomentoComida } from '@/types';
+import { useMenuStore } from '@/stores/menuStore';
+import { DiasSemana, MomentoComida } from '@/types';
 
 const props = defineProps<{
   dia: DiasSemana;
 }>();
 
-const obtenerPlatos = (diaActual: DiasSemana, momentoActual: MomentoComida): string[] => {
-  const platosEncontrados = menuSemanal.filter((plato) =>
-    plato.asignaciones.some(
-      (asignacion) => asignacion.dia === diaActual && asignacion.momento === momentoActual,
-    ),
-  );
+const store = useMenuStore();
 
-  return platosEncontrados.map((platoEncontrado) => {
-    const asignacionEspecifica = platoEncontrado.asignaciones.find(
-      (asignacion) => asignacion.dia === diaActual && asignacion.momento === momentoActual,
-    );
-
-    if (asignacionEspecifica?.favorito) {
-      return `${platoEncontrado.nombre} ⭐`;
-    }
-
-    return platoEncontrado.nombre;
-  });
-};
-
-const platosComida = computed(() => obtenerPlatos(props.dia, 'comida'));
-const platosCena = computed(() => obtenerPlatos(props.dia, 'cena'));
+const platosComida = computed(() => store.obtenerPlatos(props.dia, MomentoComida.comida));
+const platosCena = computed(() => store.obtenerPlatos(props.dia, MomentoComida.cena));
 </script>
 
 <style scoped>

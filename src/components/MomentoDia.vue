@@ -51,4 +51,8 @@ const props = defineProps<{
 .plato-item::before {
   content: ' • ';
 }
+
+.sin-asignar {
+  color: cadetblue;
+}
 </style>
