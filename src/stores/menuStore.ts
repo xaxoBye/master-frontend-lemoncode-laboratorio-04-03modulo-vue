@@ -172,6 +172,43 @@ export const useMenuStore = defineStore('menu', () => {
     });
   }
 
+  // Añadir nuevo plato
+  function incluirNuevoPlato(
+    nombre: string,
+    dia: DiasSemana,
+    momento: MomentoComida,
+  ): ComidaAsignada {
+    // Validación básica
+    if (!nombre || nombre.trim() === '') {
+      console.error('❌ Error: El nombre del plato no puede estar vacío');
+      throw new Error('El nombre del plato es obligatorio');
+    }
+
+    // Crear nuevo objeto plato
+    const nuevoPlato: ComidaAsignada = {
+      id: crypto.randomUUID(), // ✅ ID único universal
+      nombre: nombre.trim(), // ✅ Limpiar espacios
+      asignaciones: [
+        {
+          dia: dia,
+          momento: momento,
+          favorito: false, // Por defecto no es favorito
+        },
+      ],
+    };
+
+    // Añadir al array reactivo
+    platos.value.push(nuevoPlato);
+
+    // Contar cambio pendiente
+    incrementarContadorCambios();
+
+    console.log(`✅ [NUEVO PLATO] "${nombre}" añadido → ${dia} (${momento})`);
+    console.log('   📋 ID:', nuevoPlato.id);
+
+    return nuevoPlato;
+  }
+
   // ============================================
   // 📤 RETORNO: API pública del store
   // ============================================
@@ -201,5 +238,6 @@ export const useMenuStore = defineStore('menu', () => {
     guardarCambios,
     mostrarToast,
     obtenerPlatos,
+    incluirNuevoPlato,
   };
 });
