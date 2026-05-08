@@ -1,54 +1,55 @@
 <template>
   <main class="planificador">
-    <!-- <div class="contenedor-accion">
-      <button class="btn-añadir-plato" @click="abrirModal" title="Añadir nuevo plato">
-        <span class="btn-icono">➕</span>
-        <span class="btn-texto">Añadir Plato</span>
-      </button>
-    </div> -->
+    <div class="contenedor-formulario">
+      <TablaBtnIncluirPlato
+        :mostrar-formulario="mostrarFormulario"
+        @abrir-formulario="abrirFormulario"
+      />
+
+      <TablaFormIncluirPlato
+        :mostrar-formulario="mostrarFormulario"
+        :formulario="formulario"
+        :errores="errores"
+        :enviando="enviando"
+        :dias-semana="diasSemana"
+        :platos-ordenados="store.platosOrdenados"
+        @submit="handleIncluirPlato"
+        @cancelar="cerrarFormulario"
+        @update:nombre="formulario.nombre = $event"
+        @update:dia="formulario.dia = $event"
+        @update:momento="formulario.momento = $event"
+      />
+    </div>
 
     <ol ref="target" class="dias-semana">
       <li v-for="dia in diasOrdenados" :key="dia" class="dia-caja">
         <CardDia :dia="dia" />
       </li>
     </ol>
-    <p>
+    <p class="texto-info">
       Si quieres comenzar la semana por otro día. Selecciona el día y arrastralo en el primer lugar
       de la lista. O ir a
       <RouterLink to="/configuracion" class="enlace-config"> Configuración → </RouterLink>
     </p>
-    <!-- <Modal v-if="showModal" @close="cerrarModal">
-      <TablaFormIncluirPlato
-        :mostrar-formulario="true"
-        :formulario="formData"
-        :errores="formErrors"
-        :enviando="enviando"
-        :dias-semana="diasSemana"
-        :platos-ordenados="menuStore.platosOrdenados"
-        @submit="handleGuardarPlato"
-        @cancelar="cerrarModal"
-        @update:nombre="formData.nombre = $event"
-        @update:dia="formData.dia = $event"
-        @update:momento="formData.momento = $event"
-      />
-    </Modal> -->
   </main>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import CardDia from '@/components/CardDia.vue';
+import TablaBtnIncluirPlato from '@/components/TablaBtnIncluirPlato.vue';
+import TablaFormIncluirPlato from '@/components/TablaFormIncluirPlato.vue';
+import { usePlatoForm } from '@/composables/usePlatoForm';
 import { DiasSemana } from '@/types';
+import type { ComidaAsignada } from '@/types';
 import { useDraggable } from 'vue-draggable-plus';
 import { useListsStore } from '@/stores/lists';
 import menuSemanal from '@/data/comidas.json';
 import { useMenuStore } from '@/stores/menuStore';
-import type { ComidaAsignada } from '@/types';
 
 const target = ref<HTMLElement | null>(null);
 const listsStore = useListsStore();
-
-const menuStore = useMenuStore();
+const store = useMenuStore();
 
 onMounted(() => {
   inicializarDatosMenu();
@@ -99,7 +100,7 @@ function inicializarDatosMenu(): void {
 
       // Validar que sea un array válido
       if (Array.isArray(datosParseados) && datosParseados.length > 0) {
-        menuStore.cargarPlatos(datosParseados);
+        store.cargarPlatos(datosParseados);
         console.log('✅ Datos recuperados de localStorage:', datosParseados.length, 'platos');
         return; // ← Salir temprano, todo listo
       }
@@ -110,8 +111,32 @@ function inicializarDatosMenu(): void {
 
   // 2. Si no hay localStorage (o está corrupto) → usar JSON por defecto
   console.log('📥 Primera carga: usando datos por defecto del JSON');
-  menuStore.cargarPlatos(menuSemanal as ComidaAsignada[]);
+  store.cargarPlatos(menuSemanal as ComidaAsignada[]);
 }
+
+// ============================================
+// 👆 USAR EL COMPOSABLE (¡Misma línea mágica!)
+// ============================================
+const {
+  mostrarFormulario,
+  formulario,
+  errores,
+  enviando,
+  abrirFormulario,
+  cerrarFormulario,
+  handleIncluirPlato,
+} = usePlatoForm();
+
+// Días de la semana (para pasar al formulario)
+const diasSemana: DiasSemana[] = [
+  DiasSemana.LUNES,
+  DiasSemana.MARTES,
+  DiasSemana.MIERCOLES,
+  DiasSemana.JUEVES,
+  DiasSemana.VIERNES,
+  DiasSemana.SABADO,
+  DiasSemana.DOMINGO,
+];
 </script>
 
 <style scoped>
@@ -119,6 +144,10 @@ function inicializarDatosMenu(): void {
 .planificador {
   padding: 1rem;
   color: #333;
+}
+
+.contenedor-formulario {
+  margin-bottom: 1.5rem;
 }
 
 .dias-semana {
@@ -136,9 +165,15 @@ function inicializarDatosMenu(): void {
   cursor: not-allowed !important;
 }
 
-p {
-  color: white;
+.dia-caja {
+  width: 100%;
 }
+
+.texto-info {
+  color: white;
+  margin-top: 1rem;
+}
+
 .enlace-config {
   color: #0066ff;
   text-decoration: underline;

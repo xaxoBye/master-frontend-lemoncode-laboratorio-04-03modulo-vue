@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { onMounted } from 'vue';
 import { DiasSemana } from '@/types';
 import type { ComidaAsignada } from '@/types';
 import { MomentoComida } from '@/types';
@@ -99,6 +99,48 @@ import { useMenuStore } from '@/stores/menuStore';
 import TablaGuardar from './TablaGuardar.vue';
 import TablaBtnIncluirPlato from './TablaBtnIncluirPlato.vue';
 import TablaFormIncluirPlato from './TablaFormIncluirPlato.vue';
+import { usePlatoForm } from '@/composables/usePlatoForm';
+
+const {
+  mostrarFormulario,
+  formulario,
+  errores,
+  enviando,
+  abrirFormulario,
+  cerrarFormulario,
+  handleIncluirPlato,
+} = usePlatoForm();
+
+onMounted(() => {
+  cargarDatosDesdeStorage();
+});
+
+function cargarDatosDesdeStorage(): void {
+  console.log('🔄 TablaFavoritos: Verificando datos en localStorage...');
+
+  const datosGuardados = localStorage.getItem('menu-semanal-favoritos');
+
+  if (datosGuardados) {
+    try {
+      const datosParseados: ComidaAsignada[] = JSON.parse(datosGuardados);
+
+      if (Array.isArray(datosParseados) && datosParseados.length > 0) {
+        // Cargar en el store (esto actualiza automáticamente la tabla)
+        store.cargarPlatos(datosParseados);
+
+        console.log(
+          '✅ TablaFavoritos: Datos sincronizados desde storage:',
+          datosParseados.length,
+          'platos',
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error leyendo localStorage en TablaFavoritos:', error);
+    }
+  } else {
+    console.log('ℹ️ TablaFavoritos: No hay datos en localStorage');
+  }
+}
 
 const store = useMenuStore();
 
@@ -111,135 +153,6 @@ const diasSemana: DiasSemana[] = [
   DiasSemana.SABADO,
   DiasSemana.DOMINGO,
 ];
-
-/** Controla si el formulario es visible */
-const mostrarFormulario = ref(false);
-
-/** Estado de envío (para spinner) */
-const enviando = ref(false);
-
-/** Datos del formulario */
-const formulario = reactive({
-  nombre: '',
-  dia: '' as DiasSemana | '',
-  momento: '' as MomentoComida | '',
-});
-
-/** Errores de validación */
-const errores = reactive({
-  nombre: '',
-  dia: '',
-  momento: '',
-});
-
-// ============================================
-// 🔧 FUNCIONES DEL FORMULARIO
-// ============================================
-
-/** Abrir formulario y focus en input */
-async function abrirFormulario(): Promise<void> {
-  mostrarFormulario.value = true;
-  resetearFormulario();
-}
-
-/** Cerrar formulario */
-function cerrarFormulario(): void {
-  mostrarFormulario.value = false;
-  resetearFormulario();
-}
-
-function platoYaExiste(nombre: string): boolean {
-  const nombreNormalizado = nombre.toLocaleLowerCase().trim();
-
-  return store.platos.some(
-    (plato) => plato.nombre.toLocaleLowerCase().trim() === nombreNormalizado,
-  );
-}
-
-/** Resetear formulario a valores iniciales */
-function resetearFormulario(): void {
-  formulario.nombre = '';
-  formulario.dia = '' as DiasSemana | '';
-  formulario.momento = '' as MomentoComida | '';
-  errores.nombre = '';
-  errores.dia = '';
-  errores.momento = '';
-  enviando.value = false;
-}
-
-/** Validar formulario antes de enviar */
-function validarFormulario(): boolean {
-  let valido = true;
-
-  // Resetear errores
-  errores.nombre = '';
-  errores.dia = '';
-  errores.momento = '';
-
-  // Validar nombre
-  if (!formulario.nombre || formulario.nombre.trim() === '') {
-    errores.nombre = 'El nombre del plato es obligatorio';
-    valido = false;
-  } else if (formulario.nombre.trim().length < 2) {
-    errores.nombre = 'El nombre debe tener al menos 2 caracteres';
-    valido = false;
-  }
-
-  // Validar día
-  if (!formulario.dia) {
-    errores.dia = 'Debes seleccionar un día';
-    valido = false;
-  }
-
-  // Validar momento
-  if (!formulario.momento) {
-    errores.momento = 'Debes seleccionar comida o cena';
-    valido = false;
-  } else if (platoYaExiste(formulario.nombre.trim())) {
-    errores.nombre = '⚠️ Este plato ya existe en tu menú';
-    valido = false;
-  }
-
-  return valido;
-}
-
-/** Manejar envío del formulario */
-async function handleIncluirPlato(): Promise<void> {
-  // Validar
-  if (!validarFormulario()) {
-    console.log('❌ Validación fallida');
-    return;
-  }
-
-  try {
-    enviando.value = true;
-
-    // Simular pequeña demora para efecto visual (opcional)
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Llamar al store para crear el plato
-    const nuevoPlato = store.incluirNuevoPlato(
-      formulario.nombre,
-      formulario.dia as DiasSemana,
-      formulario.momento as MomentoComida,
-    );
-
-    console.log('✅ Plato creado exitosamente:', nuevoPlato);
-
-    // Cerrar formulario
-    cerrarFormulario();
-
-    // Mostrar éxito (opcional: podrías usar el toast del store)
-    store.mostrarToast(`✅ "${formulario.nombre}" añadido correctamente`, 'exito');
-  } catch (error) {
-    console.error('❌ Error al añadir plato:', error);
-    store.mostrarToast('Error al añadir el plato', 'error');
-  } finally {
-    enviando.value = false;
-  }
-}
-
-// ============================================
 
 function handleToggleFavoritos(
   plato: ComidaAsignada,

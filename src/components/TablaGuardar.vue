@@ -27,7 +27,10 @@
       <span class="btn-texto">{{ textoBotonGuardar }}</span>
     </button>
 
-    <span v-if="store.cambiosPendientes > 0 && !store.showExitoGuardado" class="badge-cambios">
+    <span
+      v-if="store.cambiosPendientes > 0 && !store.showExitoGuardado && !store.esAutoGuardado"
+      class="badge-cambios"
+    >
       &nbsp; Cambios: &nbsp; {{ store.cambiosPendientes }}
     </span>
 
