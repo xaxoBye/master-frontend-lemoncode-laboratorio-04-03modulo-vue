@@ -2,129 +2,27 @@
   <fieldset class="menu-fieldset">
     <div class="tabla-menu">
       <TablaGuardar />
-      <button
-        v-if="!mostrarFormulario"
-        @click="abrirFormulario"
-        class="btn-añadir-plato"
-        title="Añadir un nuevo plato al menú"
-      >
-        <span class="btn-icono">➕</span>
-        <span class="btn-texto">Añadir Nuevo Plato</span>
-      </button>
+      <TablaBtnIncluirPlato
+        :mostrar-formulario="mostrarFormulario"
+        @abrir-formulario="abrirFormulario"
+      />
     </div>
 
     <legend class="menu-legend">🍽️ Semana Actual</legend>
-    <transition name="slide-form">
-      <div v-if="mostrarFormulario" class="contenedor-formulario">
-        <h3 class="form-titulo">
-          <span class="icono-titulo">🍽️</span>
-          Nuevo Plato
-        </h3>
 
-        <form @submit.prevent="handleIncluirPlato" class="formulario-nuevo-plato">
-          <!-- Campo: Nombre del Plato -->
-          <div class="campo-formulario">
-            <label for="input-nombre" class="label-campo">
-              <span class="label-icono">📛</span>
-              Nombre del Plato *
-            </label>
-            <input
-              id="input-nombre"
-              ref="inputNombreRef"
-              v-model="formulario.nombre"
-              type="text"
-              placeholder="Ej: Pasta Carbonara, Ensalada César..."
-              class="input-texto"
-              :class="{ 'input-error': errores.nombre }"
-              maxlength="50"
-              required
-              autocomplete="off"
-              list="nombrePlatos"
-            />
-            <datalist id="nombrePlatos">
-              <option
-                v-for="plato in store.platosOrdenados"
-                :key="plato.id"
-                :value="plato.nombre"
-              ></option>
-            </datalist>
-            <span v-if="errores.nombre" class="mensaje-error">
-              {{ errores.nombre }}
-            </span>
-          </div>
-
-          <!-- Campo: Día de la Semana -->
-          <div class="campo-formulario">
-            <label for="select-dia" class="label-campo">
-              <span class="label-icono">📅</span>
-              Día de la Semana *
-            </label>
-            <select
-              id="select-dia"
-              v-model="formulario.dia"
-              class="input-select"
-              :class="{ 'input-error': errores.dia }"
-              required
-            >
-              <option value="" disabled>Selecciona un día...</option>
-              <option v-for="dia in diasSemana" :key="dia" :value="dia">
-                {{ formatearDia(dia) }}
-              </option>
-            </select>
-            <span v-if="errores.dia" class="mensaje-error">
-              {{ errores.dia }}
-            </span>
-          </div>
-
-          <!-- Campo: Momento (Comida/Cena) -->
-          <div class="campo-formulario campo-radio-group">
-            <label class="label-campo">
-              <span class="label-icono">⏰</span>
-              Momento *
-            </label>
-
-            <div class="radio-opciones">
-              <label class="opcion-radio">
-                <input type="radio" value="comida" v-model="formulario.momento" name="momento" />
-                <span class="radio-etiqueta">
-                  <span class="radio-icono">☀️</span>
-                  Comida
-                </span>
-              </label>
-
-              <label class="opcion-radio">
-                <input type="radio" value="cena" v-model="formulario.momento" name="momento" />
-                <span class="radio-etiqueta">
-                  <span class="radio-icono">🌙</span>
-                  Cena
-                </span>
-              </label>
-            </div>
-
-            <span v-if="errores.momento" class="mensaje-error">
-              {{ errores.momento }}
-            </span>
-          </div>
-
-          <!-- Botones de Acción -->
-          <div class="botones-accion">
-            <button type="submit" class="btn-guardar-form" :disabled="enviando">
-              <span v-if="!enviando">✅ Guardar Plato</span>
-              <span v-else class="spinner-small"></span>
-            </button>
-
-            <button
-              type="button"
-              @click="cerrarFormulario"
-              class="btn-cancelar-form"
-              :disabled="enviando"
-            >
-              ❌ Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-    </transition>
+    <TablaFormIncluirPlato
+      :mostrar-formulario="mostrarFormulario"
+      :formulario="formulario"
+      :errores="errores"
+      :enviando="enviando"
+      :dias-semana="diasSemana"
+      :platos-ordenados="store.platosOrdenados"
+      @submit="handleIncluirPlato"
+      @cancelar="cerrarFormulario"
+      @update:nombre="formulario.nombre = $event"
+      @update:dia="formulario.dia = $event"
+      @update:momento="formulario.momento = $event"
+    />
 
     <table class="tabla-favoritos">
       <thead>
@@ -193,12 +91,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, nextTick } from 'vue';
+import { ref, reactive } from 'vue';
 import { DiasSemana } from '@/types';
 import type { ComidaAsignada } from '@/types';
 import { MomentoComida } from '@/types';
-import TablaGuardar from './TablaGuardar.vue';
 import { useMenuStore } from '@/stores/menuStore';
+import TablaGuardar from './TablaGuardar.vue';
+import TablaBtnIncluirPlato from './TablaBtnIncluirPlato.vue';
+import TablaFormIncluirPlato from './TablaFormIncluirPlato.vue';
 
 const store = useMenuStore();
 
@@ -214,9 +114,6 @@ const diasSemana: DiasSemana[] = [
 
 /** Controla si el formulario es visible */
 const mostrarFormulario = ref(false);
-
-/** Referencia al input para auto-focus */
-const inputNombreRef = ref<HTMLInputElement | null>(null);
 
 /** Estado de envío (para spinner) */
 const enviando = ref(false);
@@ -243,10 +140,6 @@ const errores = reactive({
 async function abrirFormulario(): Promise<void> {
   mostrarFormulario.value = true;
   resetearFormulario();
-
-  // Esperar a que el DOM se actualice y hacer focus
-  await nextTick();
-  inputNombreRef.value?.focus();
 }
 
 /** Cerrar formulario */
@@ -272,11 +165,6 @@ function resetearFormulario(): void {
   errores.dia = '';
   errores.momento = '';
   enviando.value = false;
-}
-
-/** Formatear nombre del día para mostrar */
-function formatearDia(dia: DiasSemana): string {
-  return dia.charAt(0).toUpperCase() + dia.slice(1).toLowerCase();
 }
 
 /** Validar formulario antes de enviar */
@@ -599,271 +487,6 @@ function getTooltip(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComi
 
 .btn-texto {
   white-space: nowrap;
-}
-
-/* ============================================
-   ✨ NUEVO: CONTENEDOR DEL FORMULARIO
-   ============================================ */
-
-.contenedor-formulario {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 2px solid #0066ff;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 24px rgba(0, 102, 255, 0.15);
-}
-
-.form-titulo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 20px 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0066ff;
-  text-align: center;
-}
-
-.icono-titulo {
-  font-size: 1.75rem;
-}
-
-/* ============================================
-   ✨ NUEVO: FORMULARIO
-   ============================================ */
-
-.formulario-nuevo-plato {
-  display: grid;
-  gap: 20px;
-}
-
-.campo-formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label-campo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #334155;
-}
-
-.label-icono {
-  font-size: 1.1rem;
-}
-
-.input-texto,
-.input-select {
-  padding: 12px 16px;
-  font-size: 1rem;
-  font-family: inherit;
-
-  border: 2px solid #cbd5e1;
-  border-radius: 8px;
-  background-color: white;
-  color: #1e293b;
-
-  transition: all 0.25s ease;
-  outline: none;
-}
-
-.input-texto:focus,
-.input-select:focus {
-  border-color: #0066ff;
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
-}
-
-.input-texto::placeholder {
-  color: #94a3b8;
-}
-
-.input-error {
-  border-color: #ef4444 !important;
-  background-color: #fef2f2;
-}
-
-.input-error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
-}
-
-.mensaje-error {
-  font-size: 0.85rem;
-  color: #dc2626;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Radio Buttons personalizados */
-.campo-radio-group {
-  margin-top: 4px;
-}
-
-.radio-opciones {
-  display: flex;
-  gap: 16px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.opcion-radio {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 10px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  transition: all 0.25s ease;
-  flex: 1;
-  min-width: 140px;
-}
-
-.opcion-radio:hover {
-  border-color: #0066ff;
-  background-color: #f0f9ff;
-}
-
-.opcion-radio input[type='radio'] {
-  width: 18px;
-  height: 18px;
-  accent-color: #0066ff;
-  cursor: pointer;
-}
-
-.radio-etiqueta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  color: #334155;
-  user-select: none;
-}
-
-.radio-icono {
-  font-size: 1.2rem;
-}
-
-/* Botones de acción */
-.botones-accion {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-  justify-content: flex-end;
-}
-
-.btn-guardar-form {
-  padding: 14px 28px;
-  font-size: 1rem;
-  font-weight: 700;
-
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 160px;
-}
-
-.btn-guardar-form:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-}
-
-.btn-guardar-form:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.btn-cancelar-form {
-  padding: 14px 28px;
-  font-size: 1rem;
-  font-weight: 600;
-
-  background: white;
-  color: #64748b;
-  border: 2px solid #cbd5e1;
-  border-radius: 8px;
-
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-cancelar-form:hover:not(:disabled) {
-  border-color: #94a3b8;
-  color: #475569;
-  background-color: #f8fafc;
-}
-
-.btn-cancelar-form:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Spinner pequeño para botón */
-.spinner-small {
-  width: 18px;
-  height: 18px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ============================================
-   ✨ ANIMACIÓN DEL FORMULARIO (Transición)
-   ============================================ */
-
-.slide-form-enter-active,
-.slide-form-leave-active {
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.slide-form-enter-from {
-  opacity: 0;
-  max-height: 0;
-  transform: translateY(-20px);
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.slide-form-leave-to {
-  opacity: 0;
-  max-height: 0;
-  transform: translateY(-20px);
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.slide-form-enter-to,
-.slide-form-leave-from {
-  max-height: 800px; /* Suficientemente grande */
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* ============================================

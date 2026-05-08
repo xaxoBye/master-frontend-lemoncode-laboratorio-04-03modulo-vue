@@ -1,5 +1,12 @@
 <template>
   <main class="planificador">
+    <!-- <div class="contenedor-accion">
+      <button class="btn-añadir-plato" @click="abrirModal" title="Añadir nuevo plato">
+        <span class="btn-icono">➕</span>
+        <span class="btn-texto">Añadir Plato</span>
+      </button>
+    </div> -->
+
     <ol ref="target" class="dias-semana">
       <li v-for="dia in diasOrdenados" :key="dia" class="dia-caja">
         <CardDia :dia="dia" />
@@ -10,6 +17,21 @@
       de la lista. O ir a
       <RouterLink to="/configuracion" class="enlace-config"> Configuración → </RouterLink>
     </p>
+    <!-- <Modal v-if="showModal" @close="cerrarModal">
+      <TablaFormIncluirPlato
+        :mostrar-formulario="true"
+        :formulario="formData"
+        :errores="formErrors"
+        :enviando="enviando"
+        :dias-semana="diasSemana"
+        :platos-ordenados="menuStore.platosOrdenados"
+        @submit="handleGuardarPlato"
+        @cancelar="cerrarModal"
+        @update:nombre="formData.nombre = $event"
+        @update:dia="formData.dia = $event"
+        @update:momento="formData.momento = $event"
+      />
+    </Modal> -->
   </main>
 </template>
 
