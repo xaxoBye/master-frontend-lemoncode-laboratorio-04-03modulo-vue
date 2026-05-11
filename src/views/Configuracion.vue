@@ -2,8 +2,10 @@
   <div class="configuracion">
     <div class="selector-dia">
       <label for="inicio-semana"> Elige el día de la semana que quieres que empiece: </label>
-      <select id="inicio-semana" v-model="listsStore.diaInicio">
-        <option v-for="dia in opcionesDias" :key="dia" :value="dia">
+      <select id="inicio-semana" v-model="listsStore.diaInicio"
+              @change="irPlanificador"
+      >
+        <option v-for="dia in opcionesDias" :key="dia" :value="dia" >
           {{ dia }}
         </option>
       </select>
@@ -14,9 +16,16 @@
 <script setup lang="ts">
 import { useListsStore } from '@/stores/lists';
 import { DiasSemana } from '@/types';
+import { useRouter } from 'vue-router';
 
 const listsStore = useListsStore();
 const opcionesDias = Object.values(DiasSemana);
+const router = useRouter();
+
+const irPlanificador = () => {
+  router.push({ name: 'home'});
+}
+
 </script>
 
 <style scoped>
