@@ -23,7 +23,7 @@
 <style scoped>
 .leyenda-colapsable {
   max-width: 500px;
-  margin: 10px auto 0 auto;
+  margin: 1rem auto;
 
   border: 1px solid #dee2e6;
   border-radius: 8px;

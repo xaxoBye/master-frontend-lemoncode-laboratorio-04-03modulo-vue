@@ -1,7 +1,6 @@
 <template>
   <div class="bloque-comida">
     <dt class="titulo-comida">
-      <span class="icono">{{ iconoMomento }}</span>
       {{ momento }}
     </dt>
     <dd class="contenido-comida">
@@ -17,20 +16,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import type { ComidaAsignada } from '@/types';
+import type {  ComidaAsignada, DiasSemana } from '@/types';
 
 const props = defineProps<{
+  dia: DiasSemana;
   momento: string;
   platos: ComidaAsignada[];
 }>();
 
-const iconoMomento = computed(() => {
-  return props.momento === 'Comida' ? '☀️' : '🌙';
-});
 
 function tieneFavorito(plato: ComidaAsignada): boolean {
-  return plato.asignaciones?.some((asignacion) => asignacion.favorito === true) ?? false;
+  return (
+    plato.asignaciones?.some(
+      (asignacion) =>
+          asignacion.dia === props.dia &&
+          asignacion.favorito === true,
+    ) ?? false
+  );
 }
 </script>
 

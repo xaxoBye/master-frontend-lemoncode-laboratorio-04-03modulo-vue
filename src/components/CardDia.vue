@@ -3,8 +3,8 @@
     <h2 class="dia-titulo">{{ dia }}</h2>
 
     <dl class="comidas">
-      <MomentoDia momento="Comida" :platos="platosComida" />
-      <MomentoDia momento="Cena" :platos="platosCena" />
+      <MomentoDia :dia="dia" momento="Comida" :platos="platosComida" />
+      <MomentoDia :dia="dia"  momento="Cena" :platos="platosCena" />
     </dl>
   </div>
 </template>

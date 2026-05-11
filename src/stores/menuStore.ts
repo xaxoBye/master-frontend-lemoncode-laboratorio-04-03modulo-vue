@@ -473,7 +473,7 @@ export const useMenuStore = defineStore('menu', () => {
   }
 
   function obtenerPlatos(dia: DiasSemana, momento: MomentoComida): ComidaAsignada[] {
-    return platos.value.filter((plato) =>
+    return platosOrdenados.value.filter((plato) =>
       plato.asignaciones.some(
         (asignacion) => asignacion.dia === dia && asignacion.momento === momento,
       ),
@@ -481,7 +481,7 @@ export const useMenuStore = defineStore('menu', () => {
   }
 
   function obtenerTodosPlatosDelDia(dia: DiasSemana): ComidaAsignada[] {
-    return platos.value.filter((plato) => plato.asignaciones.some((a) => a.dia === dia));
+    return platosOrdenados.value.filter((plato) => plato.asignaciones.some((a) => a.dia === dia));
   }
 
   // ============================================

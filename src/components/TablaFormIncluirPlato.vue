@@ -116,15 +116,15 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
-import { DiasSemana } from '@/types';
-import type { ComidaAsignada } from '@/types';
+import { DiasSemana, MomentoComida } from '@/types';
+import type { ComidaAsignada} from '@/types';
 
 const props = defineProps<{
   mostrarFormulario: boolean;
   formulario: {
     nombre: string;
     dia: DiasSemana | '';
-    momento: 'comida' | 'cena' | '';
+    momento: MomentoComida | '';
   };
   errores: {
     nombre: string;
@@ -141,7 +141,7 @@ const emit = defineEmits<{
   (e: 'cancelar'): void;
   (e: 'update:nombre', value: string): void;
   (e: 'update:dia', value: DiasSemana | ''): void;
-  (e: 'update:momento', value: 'comida' | 'cena' | ''): void;
+  (e: 'update:momento', value: MomentoComida | ''): void;
 }>();
 
 const inputNombreRef = ref<HTMLInputElement | null>(null);

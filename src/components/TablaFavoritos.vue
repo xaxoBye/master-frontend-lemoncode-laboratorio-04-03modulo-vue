@@ -1,5 +1,8 @@
 <template>
+
   <fieldset class="menu-fieldset">
+    <LeyendaMenu />
+
     <div class="tabla-menu">
       <TablaGuardar />
       <TablaBtnIncluirPlato
@@ -100,6 +103,7 @@ import TablaGuardar from './TablaGuardar.vue';
 import TablaBtnIncluirPlato from './TablaBtnIncluirPlato.vue';
 import TablaFormIncluirPlato from './TablaFormIncluirPlato.vue';
 import { usePlatoForm } from '@/composables/usePlatoForm';
+import LeyendaMenu from './LeyendaMenu.vue';
 
 const {
   mostrarFormulario,
@@ -401,6 +405,7 @@ function getTooltip(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComi
 .btn-texto {
   white-space: nowrap;
 }
+
 
 /* ============================================
    📱 MÓVIL (< 768px) - TODO AL TAMAÑO DE EMOJI
