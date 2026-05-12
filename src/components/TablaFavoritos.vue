@@ -1,5 +1,4 @@
 <template>
-
   <fieldset class="menu-fieldset">
     <LeyendaMenu />
 
@@ -54,8 +53,17 @@
         <!-- Filas de platos -->
         <tr v-for="plato in store.platosOrdenados" :key="plato.id" class="fila-plato">
           <td class="nombre-plato">
-            {{ plato.nombre }}
-            <span v-if="tieneFavoritos(plato)" class="icon-fav">⭐</span>
+            <div class="contenido-plato">
+              {{ plato.nombre }}
+              <span v-if="tieneFavoritos(plato)" class="icon-fav">⭐</span>
+              <button
+                class="btn-eliminar-plato"
+                @click.stop="abrirConfirmacionEliminar(plato)"
+                title="Eliminar plato"
+              >
+                🗑️
+              </button>
+            </div>
           </td>
 
           <template v-for="dia in diasSemana" :key="`${plato.id}-${dia}`">
@@ -90,11 +98,17 @@
         </tr>
       </tbody>
     </table>
+    <ConfirmarEliminarPlato
+      :mostrar="mostrarConfirmacionEliminar"
+      :plato-nombre="platoAEliminar?.nombre ?? ''"
+      @cancelar="cancelarEliminar"
+      @confirmar="confirmarEliminar"
+    />
   </fieldset>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { DiasSemana } from '@/types';
 import type { ComidaAsignada } from '@/types';
 import { MomentoComida } from '@/types';
@@ -104,6 +118,7 @@ import TablaBtnIncluirPlato from './TablaBtnIncluirPlato.vue';
 import TablaFormIncluirPlato from './TablaFormIncluirPlato.vue';
 import { usePlatoForm } from '@/composables/usePlatoForm';
 import LeyendaMenu from './LeyendaMenu.vue';
+import ConfirmarEliminarPlato from './ConfirmarEliminarPlato.vue';
 
 const {
   mostrarFormulario,
@@ -147,6 +162,9 @@ function cargarDatosDesdeStorage(): void {
 }
 
 const store = useMenuStore();
+
+const mostrarConfirmacionEliminar = ref(false);
+const platoAEliminar = ref<ComidaAsignada | null>(null);
 
 const diasSemana: DiasSemana[] = [
   DiasSemana.LUNES,
@@ -217,6 +235,25 @@ function getTooltip(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComi
   } else {
     return `● Asignado | Click izq.: Marcar favorito | Click der.: Borrar asignación`;
   }
+}
+
+function abrirConfirmacionEliminar(plato: ComidaAsignada): void {
+  platoAEliminar.value = plato;
+  mostrarConfirmacionEliminar.value = true;
+}
+
+function cancelarEliminar(): void {
+  mostrarConfirmacionEliminar.value = false;
+  platoAEliminar.value = null;
+}
+
+function confirmarEliminar(): void {
+  if (!platoAEliminar.value) return;
+
+  store.eliminarPlato(platoAEliminar.value.id);
+
+  cancelarEliminar();
+  store.mostrarToastInfo('🗑️ Plato eliminado');
 }
 </script>
 
@@ -406,6 +443,31 @@ function getTooltip(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComi
   white-space: nowrap;
 }
 
+.contenido-plato {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.texto-plato {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-eliminar-plato {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s;
+}
+
+.btn-eliminar-plato:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
 
 /* ============================================
    📱 MÓVIL (< 768px) - TODO AL TAMAÑO DE EMOJI
