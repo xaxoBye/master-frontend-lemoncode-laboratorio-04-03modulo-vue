@@ -50,6 +50,7 @@ import { useMenuStore } from '@/stores/menuStore';
 const target = ref<HTMLElement | null>(null);
 const listsStore = useListsStore();
 const store = useMenuStore();
+const APP_INIT_KEY = 'menu-inicializado';
 
 onMounted(() => {
   inicializarDatosMenu();
@@ -91,32 +92,37 @@ useDraggable(target, diasOrdenados, {
 function inicializarDatosMenu(): void {
   console.log('🚀 Inicializando datos del menú...');
 
-  // 1. Intentar recuperar de localStorage (datos guardados previamente)
+  const yaInicializado = localStorage.getItem(APP_INIT_KEY);
   const datosGuardados = localStorage.getItem('menu-semanal-favoritos');
 
   if (datosGuardados) {
     try {
       const datosParseados: ComidaAsignada[] = JSON.parse(datosGuardados);
 
-      // Validar que sea un array válido
-      if (Array.isArray(datosParseados) && datosParseados.length > 0) {
+      if (Array.isArray(datosParseados)) {
         store.cargarPlatos(datosParseados);
-        console.log('✅ Datos recuperados de localStorage:', datosParseados.length, 'platos');
-        return; // ← Salir temprano, todo listo
+        return;
       }
     } catch (error) {
-      console.error('❌ Error leyendo localStorage, usando datos por defecto:', error);
+      console.error('❌ Error leyendo localStorage:', error);
     }
   }
 
-  // 2. Si no hay localStorage (o está corrupto) → usar JSON por defecto
-  console.log('📥 Primera carga: usando datos por defecto del JSON');
-  store.cargarPlatos(menuSemanal as ComidaAsignada[]);
+  if (!yaInicializado) {
+    console.log('📦 Primera vez → cargando JSON base');
+    store.cargarPlatos(menuSemanal as ComidaAsignada[]);
+
+    localStorage.setItem(APP_INIT_KEY, 'true');
+
+    localStorage.setItem('menu-semanal-favoritos', JSON.stringify(menuSemanal));
+
+    return;
+  }
+
+  console.log('🧹 Usuario sin datos → lista vacía');
+  store.cargarPlatos([]);
 }
 
-// ============================================
-// 👆 USAR EL COMPOSABLE (¡Misma línea mágica!)
-// ============================================
 const {
   mostrarFormulario,
   formulario,
@@ -127,7 +133,6 @@ const {
   handleIncluirPlato,
 } = usePlatoForm();
 
-// Días de la semana (para pasar al formulario)
 const diasSemana: DiasSemana[] = [
   DiasSemana.LUNES,
   DiasSemana.MARTES,
@@ -140,7 +145,6 @@ const diasSemana: DiasSemana[] = [
 </script>
 
 <style scoped>
-/* Estilos del contenedor principal */
 .planificador {
   padding: 1rem;
   color: #333;
@@ -186,7 +190,6 @@ const diasSemana: DiasSemana[] = [
   text-decoration: none;
 }
 
-/* Cuando el enlace está activo (estás en /configuracion) */
 .enlace-config.router-link-active {
   color: #004499;
   font-weight: bold;

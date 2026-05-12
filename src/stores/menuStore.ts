@@ -4,111 +4,32 @@ import { ref, computed } from 'vue';
 import { DiasSemana, MomentoComida } from '@/types';
 import type { ComidaAsignada, Asignacion } from '@/types';
 
-/**
- * ============================================
- * STORE: menuStore (Pinia)
- *
- * Gestiona todo el estado del menú semanal:
- * - Platos y sus asignaciones
- * - Favoritos
- * - Persistencia en localStorage
- * - Estado UI (toasts, badges, etc.)
- *
- * Uso:
- * ```ts
- * const store = useMenuStore();
- * store.incluirNuevoPlato('Paella', DiasSemana.LUNES, MomentoComida.comida);
- * ```
- * ============================================
- */
 export const useMenuStore = defineStore('menu', () => {
-  // ============================================
-  // 🔴 STATE: Estado Reactivo
-  // ============================================
-
-  /** Lista completa de platos con sus asignaciones */
   const platos = ref<ComidaAsignada[]>([]);
-
-  /** Contador de cambios pendientes (para el badge) */
   const cambiosPendientes = ref<number>(0);
-
-  /** Estado de carga durante guardado */
   const isGuardando = ref<boolean>(false);
-
-  /** Mostrar animación de éxito tras guardar */
   const showExitoGuardado = ref<boolean>(false);
-
-  /** Mostrar estado de error tras fallo */
   const showErrorGuardado = ref<boolean>(false);
-
-  /** Mensaje del toast actual */
   const mensajeToast = ref<string>('');
-
-  /** Tipo de toast: éxito, error o info */
   const tipoToast = ref<'exito' | 'error' | 'info'>('info');
-
-  /**
-   * Flag especial: indica si el último guardado fue automático
-   * (ej: al crear un plato desde el formulario)
-   * Cuando es true, el badge NO debe aparecer
-   */
   const esAutoGuardado = ref<boolean>(false);
 
-  /** Timer para ocultar toast automáticamente */
   let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // ============================================
-  // 🟢 GETTERS: Computados (Derivados del State)
-  // ============================================
-
-  /**
-   * Platos ordenados alfabéticamente
-   * Usado en datalist y tablas
-   */
   const platosOrdenados = computed(() => {
     return [...platos.value].sort((a, b) =>
       a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }),
     );
   });
 
-  /**
-   * ¿Hay cambios pendientes por guardar?
-   * Para habilitar/deshabilitar botón guardar
-   */
   const hayCambios = computed(() => cambiosPendientes.value > 0);
-
-  /**
-   * Total de platos en el menú
-   */
   const totalPlatos = computed(() => platos.value.length);
 
-  // ============================================
-  // 🔵 ACTIONS: Métodos que Modifican el State
-  // ============================================
-
-  // ============================================
-  // 👆 GESTIÓN DE PLATOS (CRUD)
-  // ============================================
-
-  /**
-   * Cargar platos en el store (reemplaza completamente)
-   * Usado al iniciar la app desde localStorage o JSON
-   *
-   * @param platosACargar - Array de platos a cargar
-   */
   function cargarPlatos(platosACargar: ComidaAsignada[]): void {
     platos.value = platosACargar;
     console.log(`📥 Store: Cargados ${platosACargar.length} platos`);
   }
 
-  /**
-   * Incluir un nuevo plato en el menú
-   *
-   * @param nombre - Nombre del plato
-   * @param dia - Día de la semana asignado
-   * @param momento - Comida o cena
-   * @returns El objeto del plato creado
-   */
   function incluirNuevoPlato(
     nombre: string,
     dia: DiasSemana,
@@ -119,21 +40,16 @@ export const useMenuStore = defineStore('menu', () => {
       dia,
       momento,
       favorito: false,
-      fechaAsignacion: new Date().toISOString(),
     };
 
-    // Crear objeto plato completo
     const nuevoPlato: ComidaAsignada = {
       id: generarIdUnico(),
       nombre: nombre.trim(),
       asignaciones: [nuevaAsignacion],
-      fechaCreacion: new Date().toISOString(),
     };
 
-    // Añadir al array reactivo
     platos.value.push(nuevoPlato);
 
-    // Incrementar contador de cambios pendientes
     incrementarCambios();
 
     console.log(`✅ Store: Plato "${nombre}" creado (ID: ${nuevoPlato.id})`);
@@ -141,12 +57,6 @@ export const useMenuStore = defineStore('menu', () => {
     return nuevoPlato;
   }
 
-  /**
-   * Eliminar un plato por su ID
-   *
-   * @param platoId - ID del plato a eliminar
-   * @returns true si se eliminó, false si no existía
-   */
   function eliminarPlato(platoId: string): boolean {
     const indice = platos.value.findIndex((p) => p.id === platoId);
 
@@ -156,6 +66,10 @@ export const useMenuStore = defineStore('menu', () => {
     }
 
     const platoEliminado = platos.value.splice(indice, 1)[0];
+
+    if (!platoEliminado) {
+      return false;
+    }
     incrementarCambios();
 
     console.log(`🗑️ Store: Plato "${platoEliminado.nombre}" eliminado`);
@@ -163,17 +77,6 @@ export const useMenuStore = defineStore('menu', () => {
     return true;
   }
 
-  // ============================================
-  // 👆 GESTIÓN DE ASIGNACIONES Y FAVORITOS
-  // ============================================
-
-  /**
-   * Toggle (alternar) favorito en una celda específica
-   *
-   * @param plato - Objeto del plato
-   * @param dia - Día de la semana
-   * @param momento - Comida o cena
-   */
   function toggleFavorito(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida): void {
     const asignacion = buscarAsignacionInterna(plato, dia, momento);
 
@@ -187,31 +90,19 @@ export const useMenuStore = defineStore('menu', () => {
     }
   }
 
-  /**
-   * Toggle (alternar) asignación de un plato a un día/momento
-   * Si existe → la elimina
-   * Si no existe → la crea
-   *
-   * @param plato - Objeto del plato
-   * @param dia - Día de la semana
-   * @param momento - Comida o cena
-   */
   function toggleAsignacion(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida): void {
     const indiceAsignacion = plato.asignaciones.findIndex(
       (a) => a.dia === dia && a.momento === momento,
     );
 
     if (indiceAsignacion !== -1) {
-      // Existe → eliminar
       plato.asignaciones.splice(indiceAsignacion, 1);
       console.log(`❌ Store: Asignación eliminada - ${plato.nombre} (${dia}/${momento})`);
     } else {
-      // No existe → crear
       plato.asignaciones.push({
         dia,
         momento,
         favorito: false,
-        fechaAsignacion: new Date().toISOString(),
       });
       console.log(`✅ Store: Asignación creada - ${plato.nombre} (${dia}/${momento})`);
     }
@@ -219,14 +110,6 @@ export const useMenuStore = defineStore('menu', () => {
     incrementarCambios();
   }
 
-  /**
-   * Buscar una asignación específica de un plato
-   *
-   * @param plato - Objeto del plato
-   * @param dia - Día de la semana
-   * @param momento - Comida o cena
-   * @returns La asignación encontrada o undefined
-   */
   function buscarAsignacion(
     plato: ComidaAsignada,
     dia: DiasSemana,
@@ -235,14 +118,6 @@ export const useMenuStore = defineStore('menu', () => {
     return buscarAsignacionInterna(plato, dia, momento);
   }
 
-  // ============================================
-  // 👆 PERSISTENCIA (localStorage)
-  // ============================================
-
-  /**
-   * Resetear el contador de cambios pendientes a 0
-   * Se llama tras guardar exitosamente
-   */
   function resetCambiosPendientes(): void {
     const anterior = cambiosPendientes.value;
     cambiosPendientes.value = 0;
@@ -251,10 +126,6 @@ export const useMenuStore = defineStore('menu', () => {
     console.log(`🔄 Store: Cambios reseteados (${anterior} → 0)`);
   }
 
-  /**
-   * Guardar todos los datos actuales en localStorage
-   * Incluye UI states (loading, success, error)
-   */
   async function guardarCambios(): Promise<void> {
     // Evitar guardados duplicados simultáneos
     if (isGuardando.value) {
@@ -263,26 +134,21 @@ export const useMenuStore = defineStore('menu', () => {
     }
 
     try {
-      // Estados UI: cargando
       isGuardando.value = true;
       showErrorGuardado.value = false;
       showExitoGuardado.value = false;
 
-      // Simular delay de red (quitar en producción si no necesitas)
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Serializar y guardar
       const datosJSON = JSON.stringify(platos.value);
       localStorage.setItem('menu-semanal-favoritos', datosJSON);
 
-      // Éxito
       showExitoGuardado.value = true;
       resetCambiosPendientes();
 
       console.log(`💾 Store: Guardados ${platos.value.length} platos en localStorage`);
       mostrarToastExito('¡Datos guardados correctamente!');
 
-      // Ocultar estado de éxito después de 2 segundos
       setTimeout(() => {
         showExitoGuardado.value = false;
       }, 2000);
@@ -300,12 +166,6 @@ export const useMenuStore = defineStore('menu', () => {
     }
   }
 
-  /**
-   * Cargar datos desde localStorage
-   * Retorna true si tuvo éxito, false si hubo error o no había datos
-   *
-   * @returns true si se cargaron datos
-   */
   function cargarDesdeLocalStorage(): boolean {
     try {
       const datosGuardados = localStorage.getItem('menu-semanal-favoritos');
@@ -332,45 +192,32 @@ export const useMenuStore = defineStore('menu', () => {
     }
   }
 
-  /**
-   * Limpiar todos los datos (localStorage + memoria)
-   * Opción peligrosa, usar con cuidado
-   */
-  function limpiarTodo(): void {
+  function resetEstado(): void {
     platos.value = [];
     cambiosPendientes.value = 0;
+    esAutoGuardado.value = false;
+  }
+
+  function limpiarTodo(): void {
+    resetEstado();
+    isGuardando.value = false;
     localStorage.removeItem('menu-semanal-favoritos');
 
     console.log('🧹 Store: Todos los datos eliminados');
     mostrarToastInfo('Datos eliminados');
   }
 
-  // ============================================
-  // 👆 CONTROL DE CAMBIOS PENDIENTES (Badge)
-  // ============================================
-
-  /**
-   * Incrementar el contador de cambios pendientes
-   * Se llama automáticamente tras cada modificación
-   */
   function incrementarCambios(): void {
     cambiosPendientes.value++;
     console.log(`📊 Store: Cambios pendientes = ${cambiosPendientes.value}`);
   }
 
-  /**
-   * Marcar que ocurrió un guardado automático
-   * (ej: cuando usePlatoForm guarda tras crear plato)
-   * Esto evita que aparezca el badge innecesariamente
-   */
   function marcarComoAutoGuardado(): void {
     esAutoGuardado.value = true;
     cambiosPendientes.value = 0; // Resetear inmediatamente
 
-    // Mostrar éxito brevemente
     showExitoGuardado.value = true;
 
-    // Resetear flags después de 2 segundos
     setTimeout(() => {
       esAutoGuardado.value = false;
       showExitoGuardado.value = false;
@@ -379,17 +226,6 @@ export const useMenuStore = defineStore('menu', () => {
     console.log('🤖 Store: Marcado como auto-guardado (badge oculto)');
   }
 
-  // ============================================
-  // 👆 SISTEMA DE TOASTS (Notificaciones)
-  // ============================================
-
-  /**
-   * Mostrar toast genérico
-   *
-   * @param mensaje - Texto a mostrar
-   * @param tipo - Tipo de toast ('exito', 'error', 'info')
-   * @param duracion - Tiempo en ms antes de ocultar (default: 3000ms)
-   */
   function mostrarToast(
     mensaje: string,
     tipo: 'exito' | 'error' | 'info' = 'info',
@@ -400,11 +236,9 @@ export const useMenuStore = defineStore('menu', () => {
       clearTimeout(toastTimer);
     }
 
-    // Setear nuevos valores
     mensajeToast.value = mensaje;
     tipoToast.value = tipo;
 
-    // Auto-ocultar después de la duración
     if (duracion > 0) {
       toastTimer = setTimeout(() => {
         mensajeToast.value = '';
@@ -413,30 +247,18 @@ export const useMenuStore = defineStore('menu', () => {
     }
   }
 
-  /**
-   * Atajo: Toast de éxito
-   */
   function mostrarToastExito(mensaje: string): void {
     mostrarToast(mensaje, 'exito');
   }
 
-  /**
-   * Atajo: Toast de error
-   */
   function mostrarToastError(mensaje: string): void {
-    mostrarToast(mensaje, 'error', 4000); // Errores duran más
+    mostrarToast(mensaje, 'error', 4000);
   }
 
-  /**
-   * Atajo: Toast informativo
-   */
   function mostrarToastInfo(mensaje: string): void {
     mostrarToast(mensaje, 'info');
   }
 
-  /**
-   * Ocultar toast manualmente
-   */
   function ocultarToast(): void {
     if (toastTimer) {
       clearTimeout(toastTimer);
@@ -445,14 +267,6 @@ export const useMenuStore = defineStore('menu', () => {
     mensajeToast.value = '';
   }
 
-  // ============================================
-  // 🔧 FUNCIONES AUXILIARES (Privadas)
-  // ============================================
-
-  /**
-   * Generar un ID único para nuevos platos
-   * Usa crypto.randomUUID() si está disponible, sino Date.now()
-   */
   function generarIdUnico(): string {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID();
@@ -461,9 +275,6 @@ export const useMenuStore = defineStore('menu', () => {
     return `plato-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  /**
-   * Buscar asignación interna (sin exponer al exterior directamente)
-   */
   function buscarAsignacionInterna(
     plato: ComidaAsignada,
     dia: DiasSemana,
@@ -484,12 +295,7 @@ export const useMenuStore = defineStore('menu', () => {
     return platosOrdenados.value.filter((plato) => plato.asignaciones.some((a) => a.dia === dia));
   }
 
-  // ============================================
-  // 📤 RETORNO: API PÚBLICA DEL STORE
-  // ============================================
-
   return {
-    // State (reactivo)
     platos,
     cambiosPendientes,
     isGuardando,
@@ -498,39 +304,26 @@ export const useMenuStore = defineStore('menu', () => {
     mensajeToast,
     tipoToast,
     esAutoGuardado,
-
-    // Getters (computados)
     platosOrdenados,
     hayCambios,
     totalPlatos,
-
-    // Actions: Gestión de platos
     cargarPlatos,
     incluirNuevoPlato,
     eliminarPlato,
-
-    // Actions: Asignaciones y favoritos
     toggleFavorito,
     toggleAsignacion,
     buscarAsignacion,
-
-    // Actions: Persistencia
     guardarCambios,
     cargarDesdeLocalStorage,
     limpiarTodo,
-
-    // Actions: Control de cambios
     incrementarCambios,
     resetCambiosPendientes,
     marcarComoAutoGuardado,
-
-    // Actions: Sistema de toasts
     mostrarToast,
     mostrarToastExito,
     mostrarToastError,
     mostrarToastInfo,
     ocultarToast,
-
     obtenerPlatos,
     obtenerTodosPlatosDelDia,
   };

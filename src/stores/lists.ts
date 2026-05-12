@@ -6,16 +6,12 @@ import { DiasSemana } from '@/types';
 
 export const useListsStore = defineStore('lists', () => {
   const lists = ref<ComidaAsignada[]>([]);
-
-  // NUEVO: Estado global para el día de inicio (por defecto Lunes)
   const diaInicio = ref<DiasSemana>(DiasSemana.LUNES);
 
-  // NUEVO: Función para cambiar el día de inicio
   const setDiaInicio = (nuevoDia: DiasSemana) => {
     diaInicio.value = nuevoDia;
   };
 
-  // NUEVO: Getter que calcula el array de días ordenados según el día de inicio
   const diasOrdenados = computed(() => {
     const ordenMaestro = Object.values(DiasSemana);
     const indiceInicio = ordenMaestro.indexOf(diaInicio.value);
@@ -27,12 +23,11 @@ export const useListsStore = defineStore('lists', () => {
     const newList: ComidaAsignada = {
       id: crypto.randomUUID(),
       nombre,
-      asignaciones: [{ dia: dia, momento: momentoDia }],
+      asignaciones: [{ dia, momento: momentoDia, favorito: false }],
     };
     lists.value.push(newList);
     return newList;
   };
 
-  // IMPORTANTE: Acuérdate de retornar las nuevas propiedades
   return { lists, diaInicio, setDiaInicio, diasOrdenados, createList };
 });

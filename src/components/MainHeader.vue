@@ -23,14 +23,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import router from '@/router';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useListsStore } from '@/stores/lists';
 import { DiasSemana, MomentoComida } from '@/types';
 import type { ConfiguracionTitulo } from '@/types';
 
 const route = useRoute();
-const useRouterRef = useRouter();
-
 const rutaActual = computed(() => route.path);
 
 const titulosPorRuta: Record<string, ConfiguracionTitulo> = {
@@ -56,7 +54,6 @@ const titulosPorRuta: Record<string, ConfiguracionTitulo> = {
   },
 };
 
-// ✅ Título dinámico según ruta
 const tituloPagina = computed(() => {
   const config = titulosPorRuta[rutaActual.value];
 
@@ -64,13 +61,6 @@ const tituloPagina = computed(() => {
   return config?.titulo || 'Planificador menús';
 });
 
-// ✅ Mostrar/ocultar "semanal" sub-título
-const mostrarSubtitulo = computed(() => {
-  const config = titulosPorRuta[rutaActual.value];
-  return config?.mostrarSubtitulo || false;
-});
-
-// ✅ Nombre de la página actual (para indicador opcional)
 const nombrePaginaActual = computed(() => {
   const config = titulosPorRuta[rutaActual.value];
   return config?.nombreBoton || '';

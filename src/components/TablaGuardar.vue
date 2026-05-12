@@ -47,10 +47,8 @@
 import { computed } from 'vue';
 import { useMenuStore } from '@/stores/menuStore';
 
-// ✅ Conectar al store (única fuente de verdad)
 const store = useMenuStore();
 
-// ✅ Computado local SOLO para texto del botón (UI)
 const textoBotonGuardar = computed(() => {
   if (store.isGuardando) return 'Guardando...';
   if (store.showExitoGuardado) return '¡Guardado!';
@@ -59,23 +57,20 @@ const textoBotonGuardar = computed(() => {
   return 'Guardar Cambios';
 });
 
-// ✅ Delegar acción al store (no lógica local)
 async function handleGuardarClick(): Promise<void> {
   // El store maneja TODO: estado, persistencia, errores, toast
   await store.guardarCambios();
 }
 </script>
 
-<!-- Los estilos se mantienen iguales -->
 <style scoped>
 .boton-cantidad {
-  /* ✅ FLEX ROW: Botón y badge uno al lado del otro */
   display: flex;
-  align-items: center; /* Centra verticalmente */
-  justify-content: center; /* Centra horizontalmente */
-  gap: 10px; /* Espacio entre botón y badge */
-  width: 100%; /* Ocupa todo el ancho disponible */
-  flex-wrap: wrap; /* Permite wrap si es muy pequeño */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .btn-guardar {
@@ -206,10 +201,9 @@ async function handleGuardarClick(): Promise<void> {
 }
 
 .toast-notificacion {
-  /* ✅ MISMO ANCHO QUE EL BOTÓN (o contenedor) */
   width: 100%;
-  max-width: 350px; /* Limita ancho máximo */
-  min-width: 200px; /* Ancho mínimo igual al botón */
+  max-width: 350px;
+  min-width: 200px;
 
   display: flex;
   align-items: center;
@@ -225,7 +219,6 @@ async function handleGuardarClick(): Promise<void> {
   font-weight: 500;
   color: #2d3748;
 
-  /* ✅ Bordes laterales según tipo */
   border-left: 5px solid transparent;
 }
 
@@ -281,7 +274,6 @@ async function handleGuardarClick(): Promise<void> {
   flex-shrink: 0;
 }
 
-/* Spinner de carga */
 .spinner {
   width: 18px;
   height: 18px;
@@ -297,7 +289,6 @@ async function handleGuardarClick(): Promise<void> {
   }
 }
 
-/* Iconos de estado */
 .icono-exito {
   color: #f0fff4;
   font-weight: bold;
@@ -322,7 +313,7 @@ async function handleGuardarClick(): Promise<void> {
   }
 
   .boton-y-badge {
-    flex-direction: column; /* En móvil: apilar verticalmente */
+    flex-direction: column;
     gap: 8px;
   }
 
@@ -334,14 +325,14 @@ async function handleGuardarClick(): Promise<void> {
   }
 
   .badge-cambios {
-    position: static; /* En móvil: no absoluto */
+    position: static;
     margin-top: -8px;
     margin-left: auto;
     margin-right: auto;
   }
 
   .toast-notificacion {
-    width: calc(100% - 32px); /* Ajustar a padding del contenedor */
+    width: calc(100% - 32px);
     max-width: none;
     font-size: 13px;
     padding: 12px 16px;

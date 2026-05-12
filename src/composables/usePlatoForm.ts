@@ -51,12 +51,10 @@ export function usePlatoForm() {
   function validarFormulario(): boolean {
     let valido = true;
 
-    // Resetear errores
     errores.nombre = '';
     errores.dia = '';
     errores.momento = '';
 
-    // Validar nombre
     if (!formulario.nombre || formulario.nombre.trim() === '') {
       errores.nombre = 'El nombre del plato es obligatorio';
       valido = false;
@@ -65,13 +63,11 @@ export function usePlatoForm() {
       valido = false;
     }
 
-    // Validar día
     if (!formulario.dia) {
       errores.dia = 'Debes seleccionar un día';
       valido = false;
     }
 
-    // Validar momento + duplicados
     if (!formulario.momento) {
       errores.momento = 'Debes seleccionar comida o cena';
       valido = false;
@@ -94,9 +90,7 @@ export function usePlatoForm() {
     }
   }
 
-  /** Manejar envío del formulario */
   async function handleIncluirPlato(): Promise<void> {
-    // Validar antes de enviar
     if (!validarFormulario()) {
       console.log('❌ Validación fallida');
       return;
@@ -105,10 +99,8 @@ export function usePlatoForm() {
     try {
       enviando.value = true;
 
-      // Simular pequeña demora para efecto visual (opcional)
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Llamar al store para crear el plato
       const nuevoPlato = store.incluirNuevoPlato(
         formulario.nombre.trim(),
         formulario.dia as DiasSemana,
@@ -119,11 +111,8 @@ export function usePlatoForm() {
       console.log('📊 Total platos en store ahora:', store.platos.length);
 
       guardarEnLocalStorage();
-
-      // Cerrar formulario
       cerrarFormulario();
 
-      // Mostrar mensaje de éxito
       store.mostrarToast(`✅ "${formulario.nombre}" añadido correctamente`, 'exito');
     } catch (error) {
       console.error('❌ Error al añadir plato:', error);
@@ -134,13 +123,10 @@ export function usePlatoForm() {
   }
 
   return {
-    // Estado
     mostrarFormulario,
     formulario,
     errores,
     enviando,
-
-    // Métodos
     abrirFormulario,
     cerrarFormulario,
     handleIncluirPlato,

@@ -26,6 +26,16 @@
       @update:momento="formulario.momento = $event"
     />
 
+    <div class="zona-acciones-globales">
+      <button
+        class="btn-eliminar-todo"
+        @click="mostrarConfirmacionEliminarTodos = true"
+        :disabled="store.platos.length === 0"
+      >
+        🧹 Eliminar todos los platos
+      </button>
+    </div>
+
     <table class="tabla-favoritos">
       <thead>
         <!-- Fila 1: Días -->
@@ -104,6 +114,12 @@
       @cancelar="cancelarEliminar"
       @confirmar="confirmarEliminar"
     />
+    <ConfirmarEliminarPlato
+      :mostrar="mostrarConfirmacionEliminarTodos"
+      platoNombre="TODOS los platos"
+      @cancelar="mostrarConfirmacionEliminarTodos = false"
+      @confirmar="eliminarTodos"
+    />
   </fieldset>
 </template>
 
@@ -166,6 +182,8 @@ const store = useMenuStore();
 const mostrarConfirmacionEliminar = ref(false);
 const platoAEliminar = ref<ComidaAsignada | null>(null);
 
+const mostrarConfirmacionEliminarTodos = ref(false);
+
 const diasSemana: DiasSemana[] = [
   DiasSemana.LUNES,
   DiasSemana.MARTES,
@@ -192,7 +210,6 @@ function handleToggleAsignacion(
   store.toggleAsignacion(plato, dia, momento);
 }
 
-/** Buscar asignación (delega al store) */
 function buscarAsignacion(plato: ComidaAsignada, dia: DiasSemana, momento: MomentoComida) {
   return store.buscarAsignacion(plato, dia, momento);
 }
@@ -255,12 +272,16 @@ function confirmarEliminar(): void {
   cancelarEliminar();
   store.mostrarToastInfo('🗑️ Plato eliminado');
 }
+
+function eliminarTodos(): void {
+  store.limpiarTodo(); // ya la tienes en el store
+  mostrarConfirmacionEliminarTodos.value = false;
+
+  store.mostrarToastInfo('🧹 Todos los platos eliminados');
+}
 </script>
 
 <style scoped>
-/* ============================================
-   ESTILOS - TABLA ADAPTATIVA
-   ============================================ */
 .tabla-menu {
   background-color: #0066ff;
   padding: 15px;
@@ -276,11 +297,6 @@ function confirmarEliminar(): void {
   background-color: #ffffff;
 }
 
-/* ============================================
-   💻 DESKTOP (por defecto, ≥ 768px)
-   ============================================ */
-
-/* ----- CABECERA: DÍAS ----- */
 .celda-dia {
   font-weight: bold;
   font-size: 14px;
@@ -293,7 +309,6 @@ function confirmarEliminar(): void {
   letter-spacing: 0.5px;
 }
 
-/* ----- CABECERA: COMIDA/CENA ----- */
 .fila-momentos {
   border-bottom: 2px solid #3498db;
 }
@@ -321,14 +336,12 @@ function confirmarEliminar(): void {
   border-left: 2px solid #2c3e50;
 }
 
-/* Ocultar pseudo-elementos en desktop */
 .celda-dia::before,
 .celda-momento::before,
 .celda-momento-comida::before {
   display: none;
 }
 
-/* ----- PRIMERA COLUMNA (PLATO) ----- */
 .celda-plato {
   text-align: left !important;
   padding-left: 16px !important;
@@ -340,7 +353,6 @@ function confirmarEliminar(): void {
   background-color: #2c3e50;
 }
 
-/* ----- CUERPO: FILAS ----- */
 .fila-plato {
   transition: background-color 0.2s ease;
 }
@@ -365,7 +377,6 @@ function confirmarEliminar(): void {
   font-size: 12px;
 }
 
-/* ----- CELDAS DE DATOS ----- */
 .celda-dato {
   width: 50px;
   min-width: 45px;
@@ -469,17 +480,33 @@ function confirmarEliminar(): void {
   transform: scale(1.1);
 }
 
-/* ============================================
-   📱 MÓVIL (< 768px) - TODO AL TAMAÑO DE EMOJI
+.zona-acciones-globales {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0;
+}
 
-   📏 Tamaño estándar de emoji: ~20-24px
-   🎯 Ancho objetivo: 28-30px (con padding mínimo)
-   ============================================ */
+.btn-eliminar-todo {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-eliminar-todo:hover {
+  transform: translateY(-1px);
+}
+
+.btn-eliminar-todo:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 @media (max-width: 767px) {
-  /* ============================================
-     🔷 CELDA-DÍA (cabecera: L, M, Mx...)
-     Ancho: 56px (2 columnas de emoji × 28px)
-     ============================================ */
   .tabla-favoritos {
     table-layout: fixed !important;
     min-width: max(100%, 500px);
@@ -488,13 +515,9 @@ function confirmarEliminar(): void {
   .celda-dia {
     font-size: 0 !important;
     color: transparent !important;
-
-    /* ✅ Ancho compacto = 2 emojis */
     width: 56px !important;
     min-width: 56px !important;
     max-width: 56px !important;
-
-    /* Padding mínimo */
     padding: 4px 2px !important;
     height: 28px !important;
     line-height: normal !important;
@@ -503,31 +526,21 @@ function confirmarEliminar(): void {
   .celda-dia::before {
     content: attr(data-short) !important;
     display: block !important;
-
-    /* Tamaño de letra/emoji */
     font-size: 18px !important;
     font-weight: bold !important;
     color: white !important;
-    letter-spacing: 2px !important; /* Espacio entre letras */
+    letter-spacing: 2px !important;
     text-align: center !important;
     line-height: 1.2 !important;
   }
 
-  /* ============================================
-     🔷 CELDA-MOMENTO (cabecera: ☀, 🌙)
-     Ancho: 28px (1 emoji exacto)
-     ============================================ */
   .celda-momento,
   .celda-momento-comida {
     font-size: 0 !important;
     color: transparent !important;
-
-    /* ✅ Ancho = 1 emoji exacto */
     width: 28px !important;
     min-width: 28px !important;
     max-width: 28px !important;
-
-    /* Padding mínimo */
     padding: 2px 1px !important;
     height: 28px !important;
     line-height: normal !important;
@@ -537,58 +550,33 @@ function confirmarEliminar(): void {
   .celda-momento-comida::before {
     content: attr(data-short) !important;
     display: block !important;
-
-    /* Emoji tamaño natural */
     font-size: 18px !important;
     color: #2c3e50 !important;
     text-align: center !important;
     line-height: 1.2 !important;
   }
 
-  /* ============================================
-     🔷 CELDA-DATO (cuerpo: ◼, ●, ⭐)
-     Ancho: 28px (1 emoji exacto)
-     ============================================ */
   .celda-dato {
-    /* ✅ Ancho = 1 emoji exacto */
     width: 28px !important;
     min-width: 28px !important;
     max-width: 28px !important;
-
-    /* Padding mínimo */
     height: 28px !important;
     padding: 2px 1px !important;
-
-    /* Mantener bordes finos */
     border-bottom: 1px solid #ecf0f1 !important;
     border-right: 1px solid #f0f0f0 !important;
   }
 
-  /* ============================================
-     🔷 MARCA (contenido dentro de celda-dato)
-     Tamaño del símbolo: ◼ ● ⭐
-     ============================================ */
   .marca {
-    /* ✅ Tamaño de emoji estándar */
     font-size: 16px !important;
     display: inline-block !important;
     line-height: 1 !important;
   }
 
-  /* ============================================
-     🔷 ICON-FAV (⭐ junto al nombre del plato)
-     ============================================ */
   .icon-fav {
-    /* ✅ Tamaño de emoji compacto */
     font-size: 14px !important;
     margin-left: 4px !important;
   }
 
-  /* ============================================
-     🔷 AJUSTES ADICIONES PARA MÓVIL
-     ============================================ */
-
-  /* Nombre del plato más compacto */
   .nombre-plato {
     position: sticky;
     left: 0;
@@ -597,7 +585,6 @@ function confirmarEliminar(): void {
     font-size: 13px !important;
   }
 
-  /* Reducir espaciado entre filas */
   .fila-plato {
     height: auto !important;
   }

@@ -42,7 +42,7 @@
           <select
             id="select-dia"
             :value="formulario.dia"
-            @change="$emit('update:dia', ($event.target as HTMLSelectElement).value)"
+            @change="$emit('update:dia', ($event.target as HTMLSelectElement).value as DiasSemana)"
             class="input-select"
             :class="{ 'input-error': errores.dia }"
             required
@@ -67,8 +67,8 @@
               <input
                 type="radio"
                 value="comida"
-                :checked="formulario.momento === 'comida'"
-                @change="$emit('update:momento', 'comida')"
+                :checked="formulario.momento === MomentoComida.comida"
+                @change="$emit('update:momento', MomentoComida.comida)"
                 name="momento"
               />
               <span class="radio-etiqueta">
@@ -80,8 +80,8 @@
               <input
                 type="radio"
                 value="cena"
-                :checked="formulario.momento === 'cena'"
-                @change="$emit('update:momento', 'cena')"
+                :checked="formulario.momento === MomentoComida.cena"
+                @change="$emit('update:momento', MomentoComida.cena)"
                 name="momento"
               />
               <span class="radio-etiqueta">
@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
 import { DiasSemana, MomentoComida } from '@/types';
-import type { ComidaAsignada} from '@/types';
+import type { ComidaAsignada } from '@/types';
 
 const props = defineProps<{
   mostrarFormulario: boolean;

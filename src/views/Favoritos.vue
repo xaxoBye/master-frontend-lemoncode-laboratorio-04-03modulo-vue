@@ -10,6 +10,7 @@ import { onMounted } from 'vue';
 import { useMenuStore } from '@/stores/menuStore';
 import TablaFavoritos from '@/components/TablaFavoritos.vue';
 import menuSemanal from '@/data/comidas.json';
+import type { ComidaAsignada } from '@/types';
 
 const store = useMenuStore();
 
@@ -18,12 +19,12 @@ onMounted(() => {
 
   if (datosGuardados) {
     try {
-      const datosParseados = JSON.parse(datosGuardados);
+      const datosParseados: ComidaAsignada[] = JSON.parse(datosGuardados);
       store.cargarPlatos(datosParseados);
       console.log('Datos recuperados de localStorage');
     } catch (error) {
       console.error('❌ Error leyendo localStorage, usando JSON por defecto', error);
-      store.cargarPlatos(menuSemanal);
+      store.cargarPlatos(menuSemanal as ComidaAsignada[]);
     }
   }
 });
@@ -31,9 +32,7 @@ onMounted(() => {
 
 <style scoped>
 .tabla-wrapper {
-  /* ← Centrado horizontal y vertical */
   display: block;
-
   padding: 10px;
   margin: 0px;
   overflow-x: auto; /* Scroll si es muy ancha */
