@@ -50,7 +50,6 @@ import { useMenuStore } from '@/stores/menuStore';
 const target = ref<HTMLElement | null>(null);
 const listsStore = useListsStore();
 const store = useMenuStore();
-const APP_INIT_KEY = 'menu-inicializado';
 
 onMounted(() => {
   inicializarDatosMenu();
@@ -92,7 +91,6 @@ useDraggable(target, diasOrdenados, {
 function inicializarDatosMenu(): void {
   console.log('🚀 Inicializando datos del menú...');
 
-  const yaInicializado = localStorage.getItem(APP_INIT_KEY);
   const datosGuardados = localStorage.getItem('menu-semanal-favoritos');
 
   if (datosGuardados) {
@@ -108,19 +106,8 @@ function inicializarDatosMenu(): void {
     }
   }
 
-  if (!yaInicializado) {
-    console.log('📦 Primera vez → cargando JSON base');
-    store.cargarPlatos(menuSemanal as ComidaAsignada[]);
-
-    localStorage.setItem(APP_INIT_KEY, 'true');
-
-    localStorage.setItem('menu-semanal-favoritos', JSON.stringify(menuSemanal));
-
-    return;
-  }
-
-  console.log('🧹 Usuario sin datos → lista vacía');
-  store.cargarPlatos([]);
+  store.cargarPlatos(menuSemanal as ComidaAsignada[]);
+  store.guardarEstadoSilenciosamente();
 }
 
 const {

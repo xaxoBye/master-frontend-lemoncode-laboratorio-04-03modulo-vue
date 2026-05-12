@@ -201,7 +201,8 @@ export const useMenuStore = defineStore('menu', () => {
   function limpiarTodo(): void {
     resetEstado();
     isGuardando.value = false;
-    localStorage.removeItem('menu-semanal-favoritos');
+
+    guardarEstadoSilenciosamente();
 
     console.log('🧹 Store: Todos los datos eliminados');
     mostrarToastInfo('Datos eliminados');
@@ -295,6 +296,16 @@ export const useMenuStore = defineStore('menu', () => {
     return platosOrdenados.value.filter((plato) => plato.asignaciones.some((a) => a.dia === dia));
   }
 
+  function guardarEstadoSilenciosamente(): void {
+    try {
+      const datosJSON = JSON.stringify(platos.value);
+      localStorage.setItem('menu-semanal-favoritos', datosJSON);
+      console.log(`💾 Store: Estado guardado silenciosamente (${platos.value.length} platos)`);
+    } catch (error) {
+      console.error('❌ Store: Error al guardar estado:', error);
+    }
+  }
+
   return {
     platos,
     cambiosPendientes,
@@ -326,5 +337,6 @@ export const useMenuStore = defineStore('menu', () => {
     ocultarToast,
     obtenerPlatos,
     obtenerTodosPlatosDelDia,
+    guardarEstadoSilenciosamente,
   };
 });

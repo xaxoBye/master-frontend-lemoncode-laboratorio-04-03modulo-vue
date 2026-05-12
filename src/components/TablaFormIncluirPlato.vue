@@ -9,7 +9,7 @@
       <form @submit.prevent="handleSubmit" class="formulario-nuevo-plato">
         <div class="campo-formulario">
           <label for="input-nombre" class="label-campo">
-            <span class="label-icono">📛</span>
+            <span class="label-icono">🍝</span>
             Nombre del Plato *
           </label>
           <input
