@@ -1,39 +1,36 @@
 <template>
   <fieldset class="menu-fieldset">
     <LeyendaMenu />
-
+    <legend class="menu-legend">🍽️ Semana Actual</legend>
     <div class="tabla-menu">
       <TablaGuardar />
-      <TablaBtnIncluirPlato
+      <div class="zona-acciones-globales">
+        <TablaBtnIncluirPlato
+          :mostrar-formulario="mostrarFormulario"
+          @abrir-formulario="abrirFormulario"
+        />
+        <button
+          class="btn-eliminar-todo"
+          @click="mostrarConfirmacionEliminarTodos = true"
+          :disabled="store.platos.length === 0"
+        >
+          🧹 Eliminar todos los platos
+        </button>
+      </div>
+
+      <TablaFormIncluirPlato
         :mostrar-formulario="mostrarFormulario"
-        @abrir-formulario="abrirFormulario"
+        :formulario="formulario"
+        :errores="errores"
+        :enviando="enviando"
+        :dias-semana="diasSemana"
+        :platos-ordenados="store.platosOrdenados"
+        @submit="handleIncluirPlato"
+        @cancelar="cerrarFormulario"
+        @update:nombre="formulario.nombre = $event"
+        @update:dia="formulario.dia = $event"
+        @update:momento="formulario.momento = $event"
       />
-    </div>
-
-    <legend class="menu-legend">🍽️ Semana Actual</legend>
-
-    <TablaFormIncluirPlato
-      :mostrar-formulario="mostrarFormulario"
-      :formulario="formulario"
-      :errores="errores"
-      :enviando="enviando"
-      :dias-semana="diasSemana"
-      :platos-ordenados="store.platosOrdenados"
-      @submit="handleIncluirPlato"
-      @cancelar="cerrarFormulario"
-      @update:nombre="formulario.nombre = $event"
-      @update:dia="formulario.dia = $event"
-      @update:momento="formulario.momento = $event"
-    />
-
-    <div class="zona-acciones-globales">
-      <button
-        class="btn-eliminar-todo"
-        @click="mostrarConfirmacionEliminarTodos = true"
-        :disabled="store.platos.length === 0"
-      >
-        🧹 Eliminar todos los platos
-      </button>
     </div>
 
     <table class="tabla-favoritos">
@@ -482,7 +479,8 @@ function eliminarTodos(): void {
 
 .zona-acciones-globales {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+
   margin: 12px 0;
 }
 
